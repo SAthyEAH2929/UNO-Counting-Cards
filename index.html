@@ -1,0 +1,1891 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UNO Counting Cards — Real-time Multiplayer Web Game</title>
+  <meta name="description" content="A fast-paced multiplayer counting card game inspired by UNO mechanics. Play with friends in real-time with custom rules, Rock-Paper-Scissors starter, and interactive 3D cards.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080c16;
+      --bg-surface: #101726;
+      --bg-card: rgba(22, 32, 53, 0.75);
+      --bg-card-hover: rgba(30, 43, 71, 0.85);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-focus: #10b981;
+      --accent-green: #10b981;
+      --accent-emerald: #059669;
+      --accent-blue: #3b82f6;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --glow-lime: 0 0 25px rgba(16, 185, 129, 0.35);
+      --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 60%);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    /* Top Navigation Header */
+    header {
+      backdrop-filter: blur(16px);
+      background: rgba(16, 23, 38, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 24px;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.25rem;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      transform: rotate(-4deg);
+      transition: transform 0.2s ease;
+    }
+
+    .brand-logo:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      flex: 1;
+    }
+
+    /* Glass Panels */
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-lg);
+      transition: border-color 0.3s ease;
+    }
+
+    .panel:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Hero section */
+    .hero {
+      text-align: center;
+      padding: 30px 10px 40px;
+      position: relative;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, #34d399, #60a5fa, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 640px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    /* Notice banner */
+    .notice-box {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-yellow);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: #fde68a;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: #0b111e;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+      background: #0f182a;
+    }
+
+    input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #334155;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-accent:hover:not(:disabled) {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-lg {
+      padding: 16px 32px;
+      font-size: 1.15rem;
+      border-radius: var(--radius-md);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* Grid Layout */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .grid-section {
+      background: rgba(11, 17, 30, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .grid-section h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* In-Game Room Header */
+    .room-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    .room-code-badge {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .room-code-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: #34d399;
+      background: #09131e;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 6px 16px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Player Roster */
+    .players-roster {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .player-card {
+      background: #0d1424;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .player-card.active-turn {
+      border-color: #34d399;
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .player-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .player-score small {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .player-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .tag-host { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-you { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-ready { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-choosing { background: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.25); }
+    .tag-turn { background: rgba(16, 185, 129, 0.25); color: #a7f3d0; border: 1px solid #34d399; font-weight: 800; }
+
+    /* RPS Selection Section */
+    .rps-section {
+      background: rgba(11, 17, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .rps-section h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .rps-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .rps-btn {
+      background: #151f32;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 16px 28px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .rps-btn:hover:not(:disabled) {
+      background: #1e2d48;
+      border-color: var(--accent-blue);
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
+    }
+
+    .rps-btn.selected {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #34d399;
+      color: #34d399;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      transform: translateY(-2px);
+    }
+
+    /* Game HUD & Status Banner */
+    .game-hud {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .hud-status-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hud-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .hud-stats-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .stat-pill {
+      background: #09131f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    /* The Interactive Board & UNO Cards */
+    .board-container {
+      margin: 28px 0;
+      position: relative;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 14px;
+      perspective: 1000px;
+    }
+
+    .uno-card {
+      aspect-ratio: 2 / 3;
+      border-radius: var(--radius-md);
+      position: relative;
+      user-select: none;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      border: 3px solid rgba(255, 255, 255, 0.85);
+      overflow: hidden;
+    }
+
+    /* Card Color Schemes */
+    .card-red {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+    }
+
+    .card-blue {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+    }
+
+    .card-green {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    .card-yellow {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    /* UNO Center Oval Medallion */
+    .uno-oval {
+      position: absolute;
+      inset: 14% 10%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      transform: rotate(24deg);
+      pointer-events: none;
+    }
+
+    /* Center Value Text */
+    .uno-value {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.2rem, 3.2vw, 2.3rem);
+      color: #ffffff;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(255, 255, 255, 0.4);
+      z-index: 2;
+      position: relative;
+      letter-spacing: -0.02em;
+    }
+
+    .uno-card.action-card .uno-value {
+      font-size: clamp(0.75rem, 1.8vw, 1.15rem);
+      letter-spacing: 0.02em;
+    }
+
+    /* Card Position Number Tag (High Contrast) */
+    .card-index-tag {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      color: #f8fafc;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 3;
+    }
+
+    /* Inactive / Removed Card */
+    .uno-card.removed {
+      opacity: 0.15;
+      filter: grayscale(1) brightness(0.6);
+      transform: scale(0.92);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+
+    /* Active Cursor (Where counting starts) */
+    .uno-card.cursor-focus {
+      outline: 3px solid #38bdf8;
+      outline-offset: 3px;
+    }
+
+    /* Pulse Step Trail Animation */
+    .uno-card.pulse-step {
+      transform: scale(1.18) translateY(-10px) !important;
+      outline: 4px solid #ffffff !important;
+      outline-offset: 4px;
+      z-index: 10 !important;
+      filter: brightness(1.5) drop-shadow(0 0 20px #ffffff);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Landed Card Burst */
+    .uno-card.land-burst {
+      animation: flip-reveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes flip-reveal {
+      0% { transform: scale(1) rotateY(0deg); }
+      50% { transform: scale(1.25) rotateY(180deg); }
+      100% { transform: scale(0.92) rotateY(360deg); }
+    }
+
+    /* Actions Bar */
+    .game-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    /* Table Activity Log */
+    .activity-panel {
+      background: #0d1424;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .activity-panel h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .activity-list {
+      list-style: none;
+      max-height: 180px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 6px;
+    }
+
+    .activity-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .activity-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+    }
+
+    .activity-item {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid #3b82f6;
+    }
+
+    .activity-empty {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      font-style: italic;
+      padding: 12px 0;
+    }
+
+    /* Rules Modal / Details */
+    .rules-details {
+      margin-top: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px 24px;
+    }
+
+    .rules-details summary {
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .rules-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 0.9rem;
+    }
+
+    .rules-table th, .rules-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      vertical-align: top;
+    }
+
+    .rules-table th {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toast-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    @keyframes toast-slide-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Victory Celebration Modal */
+    .winner-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+      border: 2px solid #fbbf24;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+      animation: victory-glow 2s infinite alternate;
+    }
+
+    @keyframes victory-glow {
+      from { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
+      to { box-shadow: 0 0 40px rgba(245, 158, 11, 0.5); }
+    }
+
+    .winner-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fde68a;
+      margin-bottom: 8px;
+    }
+
+    /* Utilities */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: auto;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--accent-green);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .board-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 16px;
+      }
+      .panel {
+        padding: 18px;
+      }
+      .board-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+      .room-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Confetti Canvas -->
+  <canvas id="confettiCanvas" class="hidden"></canvas>
+
+  <!-- Navigation Header -->
+  <header>
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-logo">U</div>
+        <div>
+          <span class="brand-title">UNO Counting Cards</span>
+        </div>
+        <span class="brand-badge">Multiplayer</span>
+      </div>
+
+      <div class="header-actions">
+        <button id="soundToggle" class="icon-btn" title="Toggle Game Audio">
+          <span id="soundIcon">🔊</span> <span id="soundLabel">Sound</span>
+        </button>
+        <button id="howToPlayBtn" class="icon-btn" title="View Game Rules">
+          <span>📖</span> <span>Rules</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- LOBBY & ENTRY SECTION -->
+    <section id="entrySection">
+      <div class="hero">
+        <div class="hero-tag">✨ Real-time Multiplayer Web Game</div>
+        <h1>Count. Reveal.<br><span class="highlight">Dominate the Table.</span></h1>
+        <p>A multiplayer game combining circular board counting, tactical action cards, and Rock-Paper-Scissors opening draws. Host a table or jump into your friends' room!</p>
+      </div>
+
+      <div class="notice-box">
+        <span>💡</span>
+        <div><strong>Game Objective:</strong> Count active cards in circular order. Landing on a card claims +1 point and sets the next count to that number. Clear the board and score highest to win!</div>
+      </div>
+
+      <div class="panel">
+        <div class="form-group">
+          <label for="nameInput">Your Display Name</label>
+          <input id="nameInput" maxlength="24" placeholder="Enter your player name (e.g. Maverick)" autocomplete="nickname">
+        </div>
+
+        <div class="grid-2">
+          <!-- Host Table Section -->
+          <div class="grid-section">
+            <div>
+              <h3>👑 Host a New Table</h3>
+              <div class="input-row">
+                <div class="form-group">
+                  <label for="sizeSelect">Board Size</label>
+                  <select id="sizeSelect">
+                    <option value="16">16 Cards · Fast (2-3 min)</option>
+                    <option value="24" selected>24 Cards · Standard</option>
+                    <option value="32">32 Cards · Epic Match</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="zeroSelect">Zero Card Rule</label>
+                  <select id="zeroSelect">
+                    <option value="10" selected>Count 10 next</option>
+                    <option value="1">Count 1 next</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-row">
+                <div class="form-group">
+                  <label for="skipSelect">Skip Card Effect</label>
+                  <select id="skipSelect">
+                    <option value="1" selected>Skip 1 player ahead</option>
+                    <option value="2">Skip 2 players ahead</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="swapSelect">Swap Card Effect</label>
+                  <select id="swapSelect">
+                    <option value="yes" selected>Swap score with next</option>
+                    <option value="no">Disable score swap</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button id="createRoomBtn" class="btn btn-primary btn-block btn-lg">
+              <span>🚀</span> Create Table & Get Room Code
+            </button>
+          </div>
+
+          <!-- Join Friends Section -->
+          <div class="grid-section">
+            <div>
+              <h3>🎮 Join a Table</h3>
+              <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 18px; line-height: 1.5;">
+                Enter the 8-character table code shared by your host to jump straight into the match.
+              </p>
+              <div class="form-group">
+                <label for="joinCodeInput">8-Character Table Code</label>
+                <input id="joinCodeInput" maxlength="8" placeholder="e.g. 962908F3" autocapitalize="characters" spellcheck="false" style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase;">
+              </div>
+            </div>
+
+            <button id="joinRoomBtn" class="btn btn-accent btn-block btn-lg">
+              <span>👉</span> Join Match
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVE GAME & ROOM SECTION -->
+    <section id="gameSection" class="hidden">
+      <div class="panel">
+        <!-- Room Header -->
+        <div class="room-header">
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Table Code</div>
+            <div class="room-code-badge">
+              <span id="roomCodeDisplay" class="room-code-tag">--------</span>
+              <div id="connectionStatus" class="connection-status">
+                <span class="connection-dot"></span>
+                <span id="connectionText">Live Sync</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            <button id="copyInviteBtn" class="btn btn-secondary">
+              <span>📋</span> Copy Invite Link
+            </button>
+            <button id="leaveRoomBtn" class="btn btn-danger">
+              <span>🚪</span> Leave Table
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Players Roster -->
+        <div id="playersRoster" class="players-roster"></div>
+
+        <!-- PRE-GAME / RPS LOBBY VIEW -->
+        <div id="lobbyView" class="hidden">
+          <div class="rps-section">
+            <h3>✌️ Choose Your Opening Move</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+              Choices remain hidden until start. The player who wins Rock-Paper-Scissors takes the first turn!
+            </p>
+
+            <div class="rps-buttons">
+              <button class="rps-btn" data-rps="rock">
+                <span>🪨</span> Rock
+              </button>
+              <button class="rps-btn" data-rps="paper">
+                <span>📄</span> Paper
+              </button>
+              <button class="rps-btn" data-rps="scissors">
+                <span>✂️</span> Scissors
+              </button>
+            </div>
+
+            <p id="rpsStatusText" style="color: #34d399; font-weight: 600; font-size: 0.95rem; min-height: 24px;"></p>
+
+            <div class="game-actions-bar" style="justify-content: center; margin-top: 20px;">
+              <button id="startGameBtn" class="btn btn-primary btn-lg">
+                <span>⚔️</span> Start Match (Multiplayer)
+              </button>
+              <button id="practiceGameBtn" class="btn btn-secondary btn-lg">
+                <span>🤖</span> Solo Practice Mode
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAYING GAME VIEW -->
+        <div id="playAreaView" class="hidden">
+          <!-- Winner Podium Banner if finished -->
+          <div id="winnerBanner" class="winner-banner hidden">
+            <div class="winner-title" id="winnerText">🏆 Game Over!</div>
+            <p id="winnerSubtitle" style="color: #fef08a; font-size: 1.1rem; margin-bottom: 16px;"></p>
+            <button id="rematchBtn" class="btn btn-primary btn-lg">
+              <span>🔄</span> Start Rematch Lobby
+            </button>
+          </div>
+
+          <!-- Live Game HUD -->
+          <div class="game-hud">
+            <div class="hud-status-info">
+              <div id="turnBannerTitle" class="hud-title">Player's Turn</div>
+              <div id="effectBannerDesc" class="hud-subtitle">Cards are counted clockwise in row order.</div>
+            </div>
+
+            <div class="hud-stats-group">
+              <div class="stat-pill">
+                <div class="stat-label">Next Count</div>
+                <div id="hudNextCount" class="stat-value">6</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-label">Active Cards</div>
+                <div id="hudActiveCards" class="stat-value">24</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- The Interactive Game Board -->
+          <div class="board-container">
+            <div id="gameBoardGrid" class="board-grid" aria-label="Game board"></div>
+          </div>
+
+          <!-- In-Game Action Bar -->
+          <div class="game-actions-bar">
+            <button id="playMoveBtn" class="btn btn-primary btn-lg">
+              <span>🎯</span> <span id="playMoveText">Count 6 and Reveal</span>
+            </button>
+            <button id="skipAwayBtn" class="btn btn-danger hidden">
+              <span>⏱️</span> Skip Inactive Player
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Feed Panel -->
+      <div class="panel activity-panel">
+        <h3><span>📜</span> Table Activity Feed</h3>
+        <ul id="activityLogList" class="activity-list">
+          <li class="activity-empty">No moves logged yet. Start the round to begin!</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Collapsible Rules Details -->
+    <details id="rulesAccordion" class="rules-details">
+      <summary><span>📖</span> Game Rules & Strategy Guide</summary>
+      <table class="rules-table">
+        <thead>
+          <tr>
+            <th>Mechanic</th>
+            <th>How it works</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🏁 Opening Draw</strong></td>
+            <td>Each player chooses Rock, Paper, or Scissors. If a gesture beats the other, that player starts. Ties are resolved randomly.</td>
+          </tr>
+          <tr>
+            <td><strong>🔢 Circular Counting</strong></td>
+            <td>The game begins with an initial count of 6. Active cards are counted from left to right (row by row), wrapping around infinitely. Removed cards are automatically skipped.</td>
+          </tr>
+          <tr>
+            <td><strong>🎯 Landing & Points</strong></td>
+            <td>The card where the count ends is revealed and removed from the board. The active player scores +1 point. That card's number dictates the count for the next turn.</td>
+          </tr>
+          <tr>
+            <td><strong>0️⃣ Zero Card</strong></td>
+            <td>Landing on 0 sets the next count to 10 (or 1, depending on the host's table rules).</td>
+          </tr>
+          <tr>
+            <td><strong>⚡ SKIP Card</strong></td>
+            <td>Maintains the current count and skips the next player's turn entirely.</td>
+          </tr>
+          <tr>
+            <td><strong>🔄 SWAP Card</strong></td>
+            <td>Maintains the current count. After gaining the point, swaps total scores with the next player in turn order!</td>
+          </tr>
+          <tr>
+            <td><strong>🏆 Winning</strong></td>
+            <td>The game ends when all cards are cleared from the board. The player with the highest score wins!</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+  </main>
+
+  <footer>
+    <p>UNO Counting Cards Prototype · Real-time Multiplayer Web Application</p>
+  </footer>
+
+  <!-- Toast Notification element -->
+  <div class="toast-container">
+    <div id="toast" class="toast hidden" role="alert"></div>
+  </div>
+
+  <script>
+    // --- Web Audio API Sound Synthesizer (Zero External Dependencies) ---
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+        this.muted = localStorage.getItem('uno_sound_muted') === 'true';
+        this.updateUI();
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggle() {
+        this.muted = !this.muted;
+        localStorage.setItem('uno_sound_muted', this.muted);
+        this.updateUI();
+        if (!this.muted) {
+          this.init();
+          this.playClick();
+        }
+      }
+
+      updateUI() {
+        const icon = document.getElementById('soundIcon');
+        const label = document.getElementById('soundLabel');
+        if (icon && label) {
+          icon.textContent = this.muted ? '🔇' : '🔊';
+          label.textContent = this.muted ? 'Muted' : 'Sound';
+        }
+      }
+
+      playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.15) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch {}
+      }
+
+      playTick() {
+        this.playTone(600, 'triangle', 0.06, 0.2);
+      }
+
+      playLand() {
+        if (this.muted) return;
+        this.playTone(523.25, 'sine', 0.12, 0.2);
+        setTimeout(() => this.playTone(659.25, 'sine', 0.18, 0.25), 60);
+      }
+
+      playAction() {
+        if (this.muted) return;
+        this.playTone(400, 'sawtooth', 0.08, 0.15);
+        setTimeout(() => this.playTone(800, 'sine', 0.2, 0.2), 80);
+      }
+
+      playClick() {
+        this.playTone(880, 'sine', 0.04, 0.1);
+      }
+
+      playVictory() {
+        if (this.muted) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, index) => {
+          setTimeout(() => this.playTone(freq, 'triangle', 0.3, 0.25), index * 120);
+        });
+      }
+    }
+
+    const sound = new SoundFX();
+    document.getElementById('soundToggle').onclick = () => sound.toggle();
+
+    // --- Simple Canvas Confetti System ---
+    class Confetti {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.animating = false;
+        window.addEventListener('resize', () => this.resize());
+        this.resize();
+      }
+
+      resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
+
+      start() {
+        this.particles = [];
+        const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ffffff'];
+        for (let i = 0; i < 150; i++) {
+          this.particles.push({
+            x: window.innerWidth * Math.random(),
+            y: -20 - Math.random() * 200,
+            r: Math.random() * 6 + 4,
+            d: Math.random() * 150,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            tilt: Math.random() * 10 - 10,
+            tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
+            tiltAngle: 0
+          });
+        }
+        this.canvas.classList.remove('hidden');
+        if (!this.animating) {
+          this.animating = true;
+          this.loop();
+        }
+      }
+
+      stop() {
+        this.animating = false;
+        this.canvas.classList.add('hidden');
+      }
+
+      loop() {
+        if (!this.animating) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.particles.forEach(p => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) * 0.8;
+          p.x += Math.sin(p.d);
+          p.tilt = Math.sin(p.tiltAngle) * 15;
+
+          this.ctx.beginPath();
+          this.ctx.lineWidth = p.r / 2;
+          this.ctx.strokeStyle = p.color;
+          this.ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          this.ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          this.ctx.stroke();
+        });
+
+        if (this.particles.every(p => p.y > this.canvas.height + 20)) {
+          this.stop();
+        } else {
+          requestAnimationFrame(() => this.loop());
+        }
+      }
+    }
+
+    const confetti = new Confetti('confettiCanvas');
+
+    // --- State & Network Sync ---
+    const $ = id => document.getElementById(id);
+    let auth = null;
+    let state = null;
+    let isBusy = false;
+    let isAnimating = false;
+    let lastAnimatedMoveNumber = 0;
+    let pollIntervalId = null;
+
+    try {
+      auth = JSON.parse(sessionStorage.getItem('uno_cards_auth') || 'null');
+    } catch {}
+
+    function saveAuth() {
+      try {
+        sessionStorage.setItem('uno_cards_auth', JSON.stringify(auth));
+      } catch {}
+    }
+
+    function toast(message) {
+      const el = $('toast');
+      el.textContent = message;
+      el.classList.remove('hidden');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => el.classList.add('hidden'), 4500);
+    }
+
+    async function apiRequest(endpoint, data = null) {
+      const url = '/api/' + endpoint;
+      const headers = { 'Content-Type': 'application/json' };
+      if (auth && auth.token) {
+        headers['Authorization'] = 'Bearer ' + auth.token;
+      }
+
+      const options = {
+        method: data ? 'POST' : 'GET',
+        headers
+      };
+      if (data) {
+        options.body = JSON.stringify(data);
+      }
+
+      let res;
+      try {
+        res = await fetch(url, options);
+      } catch (err) {
+        throw new Error('Connection error. Please check your internet or server.');
+      }
+
+      let json;
+      try {
+        json = await res.json();
+      } catch {
+        throw new Error('Invalid server response.');
+      }
+
+      if (!res.ok) {
+        throw new Error(json.error || 'Request failed.');
+      }
+      return json;
+    }
+
+    async function executeAction(endpoint, payload = {}) {
+      if (isBusy || isAnimating) return;
+      isBusy = true;
+      sound.playClick();
+      renderUI();
+
+      try {
+        const out = await apiRequest(endpoint, {
+          room: auth?.room,
+          version: state?.version,
+          ...payload
+        });
+
+        if (out.token) {
+          auth = { token: out.token, room: out.state.code };
+          saveAuth();
+        }
+        applyState(out.state);
+      } catch (e) {
+        toast(e.message);
+        await syncState();
+      } finally {
+        isBusy = false;
+        renderUI();
+      }
+    }
+
+    function applyState(nextState) {
+      if (state && state.code === nextState.code && nextState.version < state.version) {
+        return;
+      }
+      const hasNewMove = nextState.lastMove && nextState.lastMove.number > lastAnimatedMoveNumber;
+      state = nextState;
+      renderUI();
+
+      if (hasNewMove) {
+        lastAnimatedMoveNumber = nextState.lastMove.number;
+        triggerCardPathAnimation(nextState.lastMove);
+      }
+    }
+
+    async function triggerCardPathAnimation(move) {
+      isAnimating = true;
+      renderUI();
+
+      if (move.card === 'SKIP' || move.card === 'SWAP') {
+        sound.playAction();
+      }
+
+      for (let i = 0; i < move.path.length; i++) {
+        const cardIndex = move.path[i];
+        const cardEl = document.getElementById('card-' + cardIndex);
+        if (cardEl) {
+          cardEl.classList.add('pulse-step');
+          sound.playTick();
+          await new Promise(r => setTimeout(r, 140));
+          cardEl.classList.remove('pulse-step');
+        }
+      }
+
+      const landEl = document.getElementById('card-' + move.landingIndex);
+      if (landEl) {
+        landEl.classList.add('land-burst');
+        sound.playLand();
+        await new Promise(r => setTimeout(r, 300));
+        landEl.classList.remove('land-burst');
+      }
+
+      if (state && state.phase === 'finished') {
+        sound.playVictory();
+        confetti.start();
+      }
+
+      isAnimating = false;
+      renderUI();
+    }
+
+    async function syncState() {
+      if (!auth) return;
+      try {
+        const res = await apiRequest('state?room=' + encodeURIComponent(auth.room));
+        applyState(res);
+        $('connectionText').textContent = 'Live Sync';
+        $('connectionStatus').style.color = '#34d399';
+      } catch (e) {
+        $('connectionText').textContent = 'Reconnecting...';
+        $('connectionStatus').style.color = '#f59e0b';
+      }
+    }
+
+    // --- UI Render Pipeline ---
+    function renderUI() {
+      const inGame = !!state;
+      $('entrySection').classList.toggle('hidden', inGame);
+      $('gameSection').classList.toggle('hidden', !inGame);
+
+      if (!state) return;
+
+      const s = state;
+      const isHost = s.you === 0;
+
+      // Header Room Code
+      $('roomCodeDisplay').textContent = s.code;
+
+      // Player Roster
+      const roster = $('playersRoster');
+      roster.replaceChildren();
+
+      s.players.forEach((p, index) => {
+        const card = document.createElement('div');
+        const isCurrentTurn = s.phase === 'playing' && s.turn === index;
+        card.className = 'player-card' + (isCurrentTurn ? ' active-turn' : '');
+
+        const header = document.createElement('div');
+        header.className = 'player-header';
+
+        const name = document.createElement('div');
+        name.className = 'player-name';
+        name.textContent = p.name;
+
+        header.append(name);
+
+        const score = document.createElement('div');
+        score.className = 'player-score';
+        score.innerHTML = `${p.score} <small>PTS</small>`;
+
+        const tags = document.createElement('div');
+        tags.className = 'player-tags';
+
+        if (index === 0) {
+          const t = document.createElement('span');
+          t.className = 'tag-badge tag-host';
+          t.textContent = '👑 Host';
+          tags.append(t);
+        }
+
+        if (index === s.you) {
+          const t = document.createElement('span');
+          t.className = 'tag-badge tag-you';
+          t.textContent = '👤 You';
+          tags.append(t);
+        }
+
+        if (isCurrentTurn) {
+          const t = document.createElement('span');
+          t.className = 'tag-badge tag-turn';
+          t.textContent = '⚡ Turn';
+          tags.append(t);
+        }
+
+        if (s.phase === 'lobby') {
+          const t = document.createElement('span');
+          t.className = 'tag-badge ' + (p.ready ? 'tag-ready' : 'tag-choosing');
+          t.textContent = p.ready ? '✓ Ready' : '⏳ Choosing';
+          tags.append(t);
+        }
+
+        card.append(header, score, tags);
+        roster.append(card);
+      });
+
+      // Lobby vs Play View
+      const isLobby = s.phase === 'lobby';
+      $('lobbyView').classList.toggle('hidden', !isLobby);
+      $('playAreaView').classList.toggle('hidden', isLobby);
+
+      // RPS Controls
+      if (isLobby) {
+        const myChoice = s.players[s.you]?.rps;
+        document.querySelectorAll('.rps-btn').forEach(btn => {
+          btn.disabled = isBusy;
+          btn.classList.toggle('selected', btn.dataset.rps === myChoice);
+        });
+
+        const rpsStatus = $('rpsStatusText');
+        if (s.players[s.you]?.ready) {
+          rpsStatus.textContent = `✓ Opening move selected (${myChoice.toUpperCase()}). Waiting for host to launch!`;
+        } else {
+          rpsStatus.textContent = '👉 Select Rock, Paper, or Scissors above to get ready.';
+        }
+
+        // Host Buttons
+        $('startGameBtn').classList.toggle('hidden', !isHost || s.players.length <= 1);
+        $('practiceGameBtn').classList.toggle('hidden', !isHost || s.players.length > 1);
+
+        $('startGameBtn').disabled = isBusy || s.players.some(p => !p.ready);
+        $('practiceGameBtn').disabled = isBusy || !s.players[0].ready;
+      }
+
+      // Board & Play Area
+      if (!isLobby) {
+        const isFinished = s.phase === 'finished';
+        const winnerBanner = $('winnerBanner');
+        winnerBanner.classList.toggle('hidden', !isFinished);
+
+        if (isFinished) {
+          const winners = s.winners.map(idx => s.players[idx].name).join(' & ');
+          $('winnerText').textContent = `🎉 Winner: ${winners}!`;
+          const highestPts = s.players.length ? Math.max(...s.players.map(p => p.score)) : 0;
+          $('winnerSubtitle').textContent = `Match completed with ${highestPts} points scored!`;
+          $('rematchBtn').classList.toggle('hidden', !isHost);
+          $('rematchBtn').disabled = isBusy;
+        }
+
+        // HUD Info
+        const currentActivePlayer = s.players[s.turn];
+        if (isFinished) {
+          $('turnBannerTitle').textContent = 'Match Finished!';
+        } else if (s.turn === s.you) {
+          $('turnBannerTitle').textContent = '🔥 It\'s Your Turn!';
+        } else {
+          $('turnBannerTitle').textContent = `${currentActivePlayer?.name || 'Player'}'s Turn`;
+        }
+
+        $('hudNextCount').textContent = s.count;
+        const activeCardCount = s.board.filter(c => c.active).length;
+        $('hudActiveCards').textContent = activeCardCount;
+
+        if (s.lastMove) {
+          $('effectBannerDesc').textContent = `Last Move: Landed on ${s.lastMove.card} (${s.lastMove.cardColor.toUpperCase()}). ${s.lastMove.effect}`;
+        } else {
+          $('effectBannerDesc').textContent = 'Initial move starts with count 6. Circular order.';
+        }
+
+        // Render Cards if not mid-animation
+        if (!isAnimating) {
+          const boardGrid = $('gameBoardGrid');
+          boardGrid.replaceChildren();
+
+          s.board.forEach(card => {
+            const cardEl = document.createElement('div');
+            cardEl.id = 'card-' + card.id;
+            const isAction = card.value === 'SKIP' || card.value === 'SWAP';
+            cardEl.className = `uno-card card-${card.color}` + 
+              (card.active ? '' : ' removed') +
+              (card.id === s.cursor ? ' cursor-focus' : '') +
+              (isAction ? ' action-card' : '');
+
+            const oval = document.createElement('div');
+            oval.className = 'uno-oval';
+
+            const val = document.createElement('div');
+            val.className = 'uno-value';
+            val.textContent = card.value === 'SKIP' ? '⚡SKIP' : (card.value === 'SWAP' ? '🔄SWAP' : card.value);
+
+            const indexTag = document.createElement('div');
+            indexTag.className = 'card-index-tag';
+            indexTag.textContent = '#' + (card.id + 1);
+
+            cardEl.append(oval, val, indexTag);
+            boardGrid.append(cardEl);
+          });
+        }
+
+        // Action Play Button
+        const playBtn = $('playMoveBtn');
+        playBtn.classList.toggle('hidden', isFinished);
+        playBtn.disabled = isBusy || isAnimating || s.turn !== s.you || s.phase !== 'playing';
+        $('playMoveText').textContent = isAnimating ? 'Counting Steps...' : `Count ${s.count} and Reveal`;
+
+        // Host Skip Inactive Button
+        const skipBtn = $('skipAwayBtn');
+        const showSkip = isHost && s.phase === 'playing' && !currentActivePlayer?.online;
+        skipBtn.classList.toggle('hidden', !showSkip);
+        skipBtn.disabled = isBusy || isAnimating;
+      }
+
+      // Activity Feed
+      const logList = $('activityLogList');
+      logList.replaceChildren();
+      if (!s.log || !s.log.length) {
+        const empty = document.createElement('li');
+        empty.className = 'activity-empty';
+        empty.textContent = 'No moves logged yet.';
+        logList.append(empty);
+      } else {
+        s.log.forEach(entry => {
+          const item = document.createElement('li');
+          item.className = 'activity-item';
+          item.textContent = entry;
+          logList.append(item);
+        });
+      }
+    }
+
+    // --- DOM Event Bindings ---
+    $('createRoomBtn').onclick = () => {
+      const name = $('nameInput').value.trim();
+      executeAction('create', {
+        name,
+        options: {
+          boardSize: Number($('sizeSelect').value),
+          zeroCount: Number($('zeroSelect').value),
+          skipSteps: Number($('skipSelect').value),
+          swapEnabled: $('swapSelect').value === 'yes'
+        }
+      });
+    };
+
+    $('joinRoomBtn').onclick = () => {
+      const name = $('nameInput').value.trim();
+      const roomCode = $('joinCodeInput').value.trim().toUpperCase();
+      if (!roomCode) {
+        toast('Please enter an 8-character table code.');
+        return;
+      }
+      executeAction('join', { room: roomCode, name });
+    };
+
+    document.querySelectorAll('.rps-btn').forEach(btn => {
+      btn.onclick = () => {
+        executeAction('rps', { choice: btn.dataset.rps });
+      };
+    });
+
+    $('startGameBtn').onclick = () => executeAction('start');
+    $('practiceGameBtn').onclick = () => executeAction('start', { practice: true });
+    $('playMoveBtn').onclick = () => executeAction('play');
+    $('rematchBtn').onclick = () => executeAction('rematch');
+    $('skipAwayBtn').onclick = () => executeAction('skip-disconnected');
+
+    $('copyInviteBtn').onclick = async () => {
+      if (!state) return;
+      sound.playClick();
+      const inviteUrl = new URL(location.href);
+      inviteUrl.search = '';
+      inviteUrl.searchParams.set('room', state.code);
+
+      try {
+        await navigator.clipboard.writeText(inviteUrl.href);
+        toast('✓ Match invite link copied to clipboard!');
+      } catch {
+        toast('Share code: ' + state.code);
+      }
+    };
+
+    $('leaveRoomBtn').onclick = () => {
+      if (isBusy || isAnimating) return;
+      if (!confirm('Leave this game view? You can return anytime with your room code.')) return;
+      sound.playClick();
+      state = null;
+      auth = null;
+      sessionStorage.removeItem('uno_cards_auth');
+      renderUI();
+      toast('Left table view.');
+    };
+
+    $('howToPlayBtn').onclick = () => {
+      sound.playClick();
+      const accordion = $('rulesAccordion');
+      accordion.open = !accordion.open;
+      accordion.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Auto-fill room code from URL parameters (?room=XYZ)
+    const urlParams = new URLSearchParams(location.search);
+    const initialRoomParam = urlParams.get('room');
+    if (initialRoomParam) {
+      $('joinCodeInput').value = initialRoomParam.toUpperCase();
+    }
+
+    // Startup & Auto-polling Loop
+    if (auth) {
+      syncState();
+    }
+    pollIntervalId = setInterval(() => {
+      if (!document.hidden && auth) {
+        syncState();
+      }
+    }, 1000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && auth) {
+        syncState();
+      }
+    });
+  </script>
+</body>
+</html>

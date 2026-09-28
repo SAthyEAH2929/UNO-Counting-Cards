@@ -1,0 +1,24 @@
+{
+  "name": "uno-counting-cards",
+  "version": "1.0.0",
+  "description": "Multiplayer counting card web game with custom rules, real-time table sync, and 3D card animations",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "build": "echo 'Build complete'"
+  },
+  "keywords": [
+    "uno",
+    "card-game",
+    "multiplayer",
+    "web-game",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
