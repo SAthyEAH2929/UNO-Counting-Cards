@@ -33,49 +33,6 @@ Ensure you have **Node.js 20+** installed:
 3. For local multiplayer testing, open a second browser window or private tab and join with the generated table code!
 
 ---
-
-## 🌐 Deploying to Vercel
-
-This repository is pre-configured for instant Vercel deployment with `vercel.json` and `api/index.js` serverless function handlers.
-
-### Option 1: Deploy with Vercel CLI (Fastest)
-
-1. In your project directory, run:
-   ```sh
-   npx vercel
-   ```
-2. Follow the interactive prompts:
-   - **Set up and deploy?** `Y`
-   - **Which scope?** (Select your Vercel account)
-   - **Link to existing project?** `N`
-   - **What’s your project’s name?** `uno-counting-cards`
-   - **In which directory is your code located?** `./`
-3. To deploy to production:
-   ```sh
-   npx vercel --prod
-   ```
-4. Vercel will output your live URL (e.g. `https://uno-counting-cards.vercel.app`).
-
----
-
-### Option 2: Deploy via GitHub & Vercel Dashboard
-
-1. Initialize git and push this repository to GitHub:
-   ```sh
-   git init
-   git add .
-   git commit -m "Initial commit of UNO Counting Cards"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/uno-web-game.git
-   git push -u origin main
-   ```
-2. Go to **[vercel.com/new](https://vercel.com/new)**.
-3. Import your `uno-web-game` repository.
-4. Keep the default settings and click **Deploy**.
-5. Your web game will be live with continuous deployment on every `git push`!
-
----
-
 ## 📁 Project Architecture
 
 ```
