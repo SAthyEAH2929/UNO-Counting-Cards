@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>UNO Snakes & Ladders — Multiplayer Card Race & Ludo Knockout</title>
-  <meta name="description" content="Multiplayer board race game where you draw UNO cards instead of rolling dice! 46-tile colorful track with ladders, Ludo-style pawn knockouts, live chat, and up to 8 players.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>UNO Snakes, Ladders & Traps — Multiplayer 46/100/200 Tiles</title>
+  <meta name="description" content="Multiplayer board race where you draw UNO cards instead of rolling dice! 46, 100, or 200 tiles modes with animated character runners, ladders, pitfall traps, Ludo knockouts, and live chat.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     :root {
       --bg-dark: #070a12;
       --bg-surface: #0e1526;
-      --bg-card: rgba(16, 24, 42, 0.85);
+      --bg-card: rgba(16, 24, 42, 0.88);
       --border-color: rgba(255, 255, 255, 0.1);
       --accent-green: #10b981;
       --accent-blue: #3b82f6;
@@ -22,9 +22,9 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
-      --radius-sm: 10px;
-      --radius-md: 16px;
-      --radius-lg: 24px;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,8 +32,8 @@
     body {
       background-color: var(--bg-dark);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.14) 0%, transparent 40%),
         radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 60%);
       color: var(--text-main);
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -41,19 +41,20 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     button, input, select { font-family: inherit; }
 
-    /* Header */
+    /* Navigation Header */
     header {
       backdrop-filter: blur(16px);
-      background: rgba(14, 21, 38, 0.88);
+      background: rgba(14, 21, 38, 0.92);
       border-bottom: 1px solid var(--border-color);
       position: sticky;
       top: 0;
       z-index: 100;
-      padding: 12px 24px;
+      padding: 10px 16px;
     }
 
     .header-inner {
@@ -62,36 +63,36 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
     }
 
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       text-decoration: none;
     }
 
     .brand-logo {
-      width: 42px;
-      height: 42px;
+      width: 36px;
+      height: 36px;
       background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6);
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Outfit', sans-serif;
       font-weight: 900;
-      font-size: 1.3rem;
+      font-size: 1.15rem;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
       transform: rotate(-3deg);
     }
 
     .brand-title {
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
-      font-size: 1.35rem;
+      font-size: 1.15rem;
       letter-spacing: -0.02em;
       background: linear-gradient(to right, #ffffff, #cbd5e1);
       -webkit-background-clip: text;
@@ -101,27 +102,22 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .icon-btn {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 8px 14px;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
       transition: all 0.2s ease;
-    }
-
-    .icon-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
     }
 
     /* Main Container */
@@ -129,7 +125,7 @@
       max-width: 1300px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px;
+      padding: 14px;
       flex: 1;
     }
 
@@ -138,15 +134,15 @@
       backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6);
     }
 
     /* Hero */
     .hero {
       text-align: center;
-      padding: 20px 10px 28px;
+      padding: 16px 8px 22px;
     }
 
     .hero-tag {
@@ -156,19 +152,19 @@
       background: rgba(59, 130, 246, 0.12);
       border: 1px solid rgba(59, 130, 246, 0.3);
       color: #60a5fa;
-      padding: 5px 14px;
+      padding: 4px 12px;
       border-radius: 999px;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .hero h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
       font-weight: 900;
       line-height: 1.15;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .hero h1 .highlight {
@@ -179,53 +175,53 @@
 
     .hero p {
       color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 680px;
-      margin: 0 auto 16px;
-      line-height: 1.5;
+      font-size: 0.95rem;
+      max-width: 640px;
+      margin: 0 auto 14px;
+      line-height: 1.45;
     }
 
-    /* Form inputs */
-    .form-group { margin-bottom: 16px; }
+    /* Forms */
+    .form-group { margin-bottom: 14px; }
 
     label {
       display: block;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
     input, select {
       width: 100%;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
-      background: #090e18;
+      background: #080c16;
       color: #fff;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       outline: none;
       transition: all 0.2s ease;
     }
 
     input:focus, select:focus {
       border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
     }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 16px;
     }
 
     .grid-section {
-      background: rgba(9, 14, 24, 0.6);
+      background: rgba(8, 12, 22, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-md);
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -236,35 +232,31 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       border: 1px solid transparent;
       border-radius: var(--radius-sm);
-      padding: 12px 20px;
-      font-size: 0.95rem;
+      padding: 10px 16px;
+      font-size: 0.92rem;
       font-weight: 700;
       transition: all 0.2s ease;
       user-select: none;
     }
 
-    .btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .btn-primary {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
     }
-    .btn-primary:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-2px); }
+    .btn-primary:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
 
     .btn-accent {
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #fff;
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
     }
-    .btn-accent:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-2px); }
 
     .btn-danger {
       background: rgba(239, 68, 68, 0.15);
@@ -272,257 +264,282 @@
       color: #fca5a5;
     }
 
-    .btn-lg { padding: 15px 28px; font-size: 1.1rem; border-radius: var(--radius-md); }
+    .btn-lg { padding: 13px 22px; font-size: 1.05rem; border-radius: var(--radius-md); }
     .btn-block { width: 100%; }
 
-    /* Room Header */
+    /* In-Game Room Header */
     .room-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 14px;
-      padding-bottom: 16px;
+      gap: 10px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .room-code-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.6rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
       color: #34d399;
-      background: #09131e;
+      background: #080d18;
       border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 4px 14px;
+      padding: 3px 10px;
       border-radius: var(--radius-sm);
     }
 
-    /* Up to 8 Players Roster Grid */
+    /* 8-Player Roster */
     .players-roster {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-      gap: 10px;
-      margin-bottom: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
     }
 
     .player-card {
-      background: #090e18;
+      background: #080d18;
       border: 1.5px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius-md);
-      padding: 10px 12px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      transition: all 0.25s ease;
+      gap: 4px;
       position: relative;
     }
 
     .player-card.active-turn {
       border-color: #34d399;
       background: rgba(16, 185, 129, 0.08);
-      box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
     }
 
-    .pawn-avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 900;
-      font-size: 0.8rem;
-      color: #000;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
-      flex-shrink: 0;
-    }
-
-    /* 8 Player Color Styles */
-    .pcolor-0 { background: #facc15; border: 2px solid #fef08a; }
-    .pcolor-1 { background: #38bdf8; border: 2px solid #bae6fd; }
-    .pcolor-2 { background: #4ade80; border: 2px solid #bbf7d0; }
-    .pcolor-3 { background: #f87171; border: 2px solid #fecaca; }
-    .pcolor-4 { background: #c084fc; border: 2px solid #e9d5ff; }
-    .pcolor-5 { background: #fb923c; border: 2px solid #fed7aa; }
-    .pcolor-6 { background: #f472b6; border: 2px solid #fbcfe8; }
-    .pcolor-7 { background: #a3e635; border: 2px solid #d9f99d; }
-
-    .player-pos-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #38bdf8;
-    }
-
-    .player-kill-badge {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #f87171;
-    }
-
-    .track-mini-progress {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .track-mini-fill {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 0.3s ease;
-    }
+    .pcolor-0 { color: #facc15; }
+    .pcolor-1 { color: #38bdf8; }
+    .pcolor-2 { color: #4ade80; }
+    .pcolor-3 { color: #f87171; }
+    .pcolor-4 { color: #c084fc; }
+    .pcolor-5 { color: #fb923c; }
+    .pcolor-6 { color: #f472b6; }
+    .pcolor-7 { color: #a3e635; }
 
     /* ====================================================
-       THE 46-TILE SNAKES & LADDERS WINDING TRACK MAP
+       THE DYNAMIC BOARD MAP (46, 100, or 200 Tiles)
        ==================================================== */
-    .track-map-container {
-      background: #080d18;
+    .track-map-wrapper {
+      background: #060912;
       border: 2px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 12px;
+      margin-bottom: 16px;
       position: relative;
       overflow-x: auto;
-      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+      -webkit-overflow-scrolling: touch;
+      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8);
     }
 
     .track-map-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
       gap: 8px;
     }
 
-    .track-map-header h3 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.2rem;
-      font-weight: 800;
+    .track-legend {
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-wrap: wrap;
     }
 
-    .track-grid {
+    .dynamic-track-grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      gap: 8px;
-      min-width: 820px;
-      aspect-ratio: 12 / 6;
+      gap: 5px;
+      padding: 8px;
       background: rgba(255, 255, 255, 0.02);
-      padding: 12px;
       border-radius: var(--radius-md);
       position: relative;
     }
 
+    /* Grid sizes for 46, 100, 200 tiles */
+    .grid-mode-46 {
+      grid-template-columns: repeat(12, 1fr);
+      min-width: 720px;
+    }
+
+    .grid-mode-100 {
+      grid-template-columns: repeat(10, 1fr);
+      min-width: 650px;
+    }
+
+    .grid-mode-200 {
+      grid-template-columns: repeat(15, 1fr);
+      min-width: 900px;
+    }
+
     .map-tile {
-      border: 2px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      min-height: 48px;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 2px;
-      transition: all 0.2s ease;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+      padding: 3px 2px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
       user-select: none;
     }
 
-    /* Tile Background Themes (inspired by image) */
-    .tile-color-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); color: #422006; }
-    .tile-color-pink { background: linear-gradient(135deg, #ec4899, #db2777); color: #500724; }
-    .tile-color-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #083344; }
-    .tile-color-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #052e16; }
-    .tile-color-orange { background: linear-gradient(135deg, #f97316, #ea580c); color: #431407; }
-    .tile-color-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #172554; }
+    /* Colorful tile themes */
+    .tile-c-0 { background: linear-gradient(135deg, #eab308, #ca8a04); color: #422006; }
+    .tile-c-1 { background: linear-gradient(135deg, #ec4899, #db2777); color: #500724; }
+    .tile-c-2 { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #083344; }
+    .tile-c-3 { background: linear-gradient(135deg, #22c55e, #16a34a); color: #052e16; }
+    .tile-c-4 { background: linear-gradient(135deg, #f97316, #ea580c); color: #431407; }
+    .tile-c-5 { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #172554; }
 
-    .tile-number {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1rem;
-      font-weight: 900;
-      line-height: 1;
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
-    }
-
-    .tile-feature-icon {
-      font-size: 0.95rem;
-      line-height: 1;
-    }
-
-    .map-tile.tile-start-gate {
+    .map-tile.tile-start {
       background: linear-gradient(135deg, #10b981, #047857) !important;
-      border: 3px solid #34d399;
+      border: 2px solid #34d399;
       color: #fff !important;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
     }
 
-    .map-tile.tile-finish-gate {
+    .map-tile.tile-finish {
       background: linear-gradient(135deg, #f59e0b, #b45309) !important;
-      border: 3px solid #fbbf24;
+      border: 2px solid #fbbf24;
       color: #fff !important;
-      box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
       animation: finish-pulse 2s infinite alternate;
     }
 
-    @keyframes finish-pulse {
-      from { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
-      to { box-shadow: 0 0 35px rgba(245, 158, 11, 0.8); }
+    .map-tile.tile-trap-pitfall {
+      background: linear-gradient(135deg, #450a0a, #7f1d1d) !important;
+      border: 2px solid #ef4444;
+      color: #fecaca !important;
     }
 
-    .tile-pawns-slot {
+    .map-tile.tile-trap-freeze {
+      background: linear-gradient(135deg, #0c4a6e, #0369a1) !important;
+      border: 2px solid #38bdf8;
+      color: #bae6fd !important;
+    }
+
+    @keyframes finish-pulse {
+      from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+      to { box-shadow: 0 0 28px rgba(245, 158, 11, 0.8); }
+    }
+
+    .tile-num-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .tile-feature-badge {
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+
+    .tile-pawns-row {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 2px;
       flex-wrap: wrap;
-      min-height: 20px;
+      min-height: 22px;
       z-index: 10;
     }
 
-    .track-pawn {
-      width: 20px;
-      height: 20px;
+    /* ====================================================
+       ANIMATED CHARACTER "MAN" RUNNER PAWN
+       ==================================================== */
+    .runner-man-pawn {
+      width: 22px;
+      height: 26px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.8));
+      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .man-head {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
+      background: currentColor;
+      border: 1.5px solid #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Outfit', sans-serif;
+      font-size: 0.55rem;
       font-weight: 900;
-      font-size: 0.7rem;
       color: #000;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 2;
     }
 
-    .track-pawn.pawn-hopping {
-      transform: translateY(-20px) scale(1.45) !important;
-      filter: brightness(1.4) drop-shadow(0 0 12px #fff);
-      z-index: 25 !important;
+    .man-body {
+      width: 8px;
+      height: 10px;
+      background: currentColor;
+      border-radius: 3px;
+      margin-top: -1px;
+      position: relative;
+    }
+
+    .man-legs {
+      display: flex;
+      gap: 2px;
+      margin-top: -1px;
+    }
+
+    .man-leg {
+      width: 2.5px;
+      height: 7px;
+      background: #fff;
+      border-radius: 1px;
+    }
+
+    /* Running animation */
+    .runner-man-pawn.man-running {
+      animation: runner-bounce 0.22s infinite alternate;
+      transform: translateY(-16px) scale(1.35) !important;
+      z-index: 30 !important;
+      filter: drop-shadow(0 0 10px #ffffff) brightness(1.3);
+    }
+
+    .runner-man-pawn.man-running .man-leg:nth-child(1) { transform: rotate(25deg); }
+    .runner-man-pawn.man-running .man-leg:nth-child(2) { transform: rotate(-25deg); }
+
+    @keyframes runner-bounce {
+      from { transform: translateY(-14px) scale(1.3); }
+      to { transform: translateY(-22px) scale(1.4); }
     }
 
     /* ====================================================
-       UNO CARD DRAW AREA & INTERACTION HUD
+       HUD: DRAW CARD & IN-GAME CHAT
        ==================================================== */
-    .gameplay-hud-grid {
+    .gameplay-hud {
       display: grid;
       grid-template-columns: 1fr 340px;
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
-    .draw-action-panel {
-      background: #090e18;
+    .draw-card-box {
+      background: #080d18;
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius-md);
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -530,21 +547,18 @@
       text-align: center;
     }
 
-    /* Big 3D UNO Drawn Card Display */
     .drawn-card-stage {
-      width: 130px;
-      height: 190px;
+      width: 120px;
+      height: 175px;
       border-radius: var(--radius-md);
-      margin: 16px 0;
+      margin: 12px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      border: 4px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      border: 3.5px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
       user-select: none;
-      transition: transform 0.4s ease;
-      perspective: 1000px;
     }
 
     .card-bg-red { background: linear-gradient(135deg, #ef4444, #991b1b); }
@@ -554,7 +568,7 @@
     .card-bg-wild { background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6); }
     .card-bg-back { background: linear-gradient(135deg, #1e293b, #0f172a); border-color: rgba(255, 255, 255, 0.3); }
 
-    .card-oval-center {
+    .card-oval {
       position: absolute;
       inset: 14% 10%;
       background: rgba(255, 255, 255, 0.2);
@@ -563,39 +577,24 @@
       transform: rotate(24deg);
     }
 
-    .card-big-text {
+    .card-value-display {
       font-family: 'Outfit', sans-serif;
       font-weight: 900;
-      font-size: 2.5rem;
+      font-size: 2.3rem;
       color: #fff;
       text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
       position: relative;
       z-index: 2;
     }
 
-    /* ====================================================
-       IN-GAME REAL-TIME CHAT BOX
-       ==================================================== */
-    .chat-box-panel {
-      background: #090e18;
+    .chat-panel {
+      background: #080d18;
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius-md);
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      height: 380px;
-    }
-
-    .chat-header {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      height: 350px;
     }
 
     .chat-stream {
@@ -603,78 +602,51 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding-right: 4px;
-      margin-bottom: 10px;
+      gap: 6px;
+      margin-bottom: 8px;
     }
 
     .chat-msg {
       background: rgba(255, 255, 255, 0.03);
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      line-height: 1.4;
-    }
-
-    .chat-sender {
-      font-weight: 800;
-      font-size: 0.78rem;
-      margin-right: 6px;
-    }
-
-    .chat-time {
-      font-size: 0.68rem;
-      color: var(--text-dim);
-      float: right;
+      font-size: 0.82rem;
     }
 
     .quick-emojis {
       display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 4px;
+      margin-bottom: 6px;
+      overflow-x: auto;
     }
 
     .emoji-pill {
       background: rgba(255, 255, 255, 0.06);
       border: none;
       color: #fff;
-      font-size: 1rem;
-      padding: 4px 8px;
+      font-size: 0.95rem;
+      padding: 3px 6px;
       border-radius: 6px;
       cursor: pointer;
     }
-    .emoji-pill:hover { background: rgba(255, 255, 255, 0.15); }
 
-    .chat-form {
-      display: flex;
-      gap: 6px;
-    }
-
-    .chat-input {
-      flex: 1;
-      padding: 8px 12px;
-      font-size: 0.88rem;
-    }
-
-    /* Winner Banner */
     .winner-banner {
       background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(239, 68, 68, 0.25));
       border: 2px solid #fbbf24;
       border-radius: var(--radius-md);
-      padding: 22px;
+      padding: 18px;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .hidden { display: none !important; }
 
-    #confettiCanvas {
-      position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999;
-    }
+    #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999; }
 
-    @media (max-width: 900px) {
-      .gameplay-hud-grid { grid-template-columns: 1fr; }
+    @media (max-width: 860px) {
+      .gameplay-hud { grid-template-columns: 1fr; }
       .grid-2 { grid-template-columns: 1fr; }
+      .chat-panel { height: 260px; }
     }
   </style>
 </head>
@@ -686,41 +658,42 @@
     <div class="header-inner">
       <div class="brand-group">
         <div class="brand-logo">U</div>
-        <div><span class="brand-title">UNO Snakes & Ladders</span></div>
+        <div><span class="brand-title">UNO Board Race</span></div>
       </div>
       <div class="header-actions">
-        <button id="soundToggle" class="icon-btn" title="Toggle Audio">
-          <span id="soundIcon">🔊</span> <span id="soundLabel">Sound</span>
-        </button>
-        <button id="howToPlayBtn" class="icon-btn" title="Game Rules">
-          <span>📖</span> <span>Rules</span>
-        </button>
+        <button id="soundToggle" class="icon-btn" title="Audio"><span id="soundIcon">🔊</span></button>
+        <button id="howToPlayBtn" class="icon-btn"><span>📖</span> Rules</button>
       </div>
     </div>
   </header>
 
   <main>
-    <!-- LOBBY VIEW -->
+    <!-- LOBBY -->
     <section id="entrySection">
       <div class="hero">
-        <div class="hero-tag">✨ Up to 8 Players · UNO Draw & Ludo Knockouts</div>
-        <h1>Draw UNO Cards.<br><span class="highlight">Climb Ladders & Knockout Foes!</span></h1>
-        <p>No dice! Draw colorful UNO cards to move your pawn along the 46-tile snakes and ladders track. Land on rivals to eliminate them back to START!</p>
+        <div class="hero-tag">🎮 46 / 100 / 200 Tiles Modes · Animated Runner Pawns</div>
+        <h1>Draw UNO Cards.<br><span class="highlight">Dodge Traps & Knockout Foes!</span></h1>
+        <p>Choose your track length (46, 100, or 200 tiles), watch your 3D character runner sprint along the board, dodge pitfall & freeze traps, and climb ladders to FINISH!</p>
       </div>
 
       <div class="panel">
         <div class="form-group">
-          <label for="nameInput">Your Display Name</label>
-          <input id="nameInput" maxlength="24" placeholder="Enter name (e.g. Sathya)" autocomplete="nickname">
+          <label for="nameInput">Player Display Name</label>
+          <input id="nameInput" maxlength="24" placeholder="Enter your name (e.g. Sathya)" autocomplete="nickname">
         </div>
 
         <div class="grid-2">
           <div class="grid-section">
             <div>
               <h3>👑 Host Table (Up to 8 Players)</h3>
-              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
-                Create a table for your friends with Ludo elimination knockouts and UNO draw mechanics!
-              </p>
+              <div class="form-group" style="margin-top: 10px;">
+                <label for="trackLengthSelect">Game Mode / Track Length</label>
+                <select id="trackLengthSelect">
+                  <option value="46" selected>46 Tiles · Quick Match (Snakes & Ladders Loop)</option>
+                  <option value="100">100 Tiles · Classic Championship (10x10 Track)</option>
+                  <option value="200">200 Tiles · Epic Grand Marathon</option>
+                </select>
+              </div>
             </div>
             <button id="createRoomBtn" class="btn btn-primary btn-block btn-lg">
               <span>🚀</span> Create Table & Get Code
@@ -729,12 +702,10 @@
 
           <div class="grid-section">
             <div>
-              <h3>🎮 Join a Table</h3>
-              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
-                Enter the 8-character table code shared by the host to join the match.
-              </p>
-              <div class="form-group">
-                <input id="joinCodeInput" maxlength="8" placeholder="e.g. 962908F3" autocapitalize="characters" spellcheck="false" style="font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; letter-spacing: 0.1em; text-transform: uppercase;">
+              <h3>🎮 Join Friends' Match</h3>
+              <div class="form-group" style="margin-top: 10px;">
+                <label for="joinCodeInput">8-Character Table Code</label>
+                <input id="joinCodeInput" maxlength="8" placeholder="e.g. 962908F3" autocapitalize="characters" spellcheck="false" style="font-family:'JetBrains Mono',monospace; font-size:1.15rem; letter-spacing:0.1em; text-transform:uppercase;">
               </div>
             </div>
             <button id="joinRoomBtn" class="btn btn-accent btn-block btn-lg">
@@ -745,15 +716,15 @@
       </div>
     </section>
 
-    <!-- IN-GAME SECTION -->
+    <!-- IN-GAME -->
     <section id="gameSection" class="hidden">
       <div class="panel">
         <div class="room-header">
           <div>
-            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Table Code</div>
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size:0.68rem; font-weight:700; color:var(--text-dim); text-transform:uppercase;">Table Code</div>
+            <div style="display:flex; align-items:center; gap:8px;">
               <span id="roomCodeDisplay" class="room-code-tag">--------</span>
-              <span id="connectionText" style="font-size: 0.85rem; color: #34d399; font-weight: 600;">Live Sync</span>
+              <span id="connectionText" style="font-size:0.8rem; color:#34d399; font-weight:600;">Live</span>
             </div>
           </div>
           <div class="header-actions">
@@ -767,16 +738,16 @@
 
         <!-- RPS LOBBY -->
         <div id="lobbyView" class="hidden">
-          <div style="text-align: center; padding: 20px; background: rgba(9, 14, 24, 0.6); border-radius: var(--radius-md);">
-            <h3>✌️ Choose Your Opening RPS Gesture</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">The winner of Rock-Paper-Scissors takes the first turn!</p>
-            <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px;">
+          <div style="text-align:center; padding:18px; background:rgba(8,12,22,0.6); border-radius:var(--radius-md);">
+            <h3>✌️ Choose Opening RPS Gesture</h3>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">RPS winner takes the first turn!</p>
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:14px;">
               <button class="btn btn-secondary rps-btn" data-rps="rock">🪨 Rock</button>
               <button class="btn btn-secondary rps-btn" data-rps="paper">📄 Paper</button>
               <button class="btn btn-secondary rps-btn" data-rps="scissors">✂️ Scissors</button>
             </div>
-            <p id="rpsStatusText" style="color: #34d399; font-weight: 600; min-height: 20px;"></p>
-            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
+            <p id="rpsStatusText" style="color:#34d399; font-weight:600; min-height:20px; font-size:0.9rem;"></p>
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
               <button id="startGameBtn" class="btn btn-primary btn-lg"><span>⚔️</span> Start Match</button>
               <button id="practiceGameBtn" class="btn btn-secondary btn-lg"><span>🤖</span> Solo Practice</button>
             </div>
@@ -785,66 +756,60 @@
 
         <!-- PLAY AREA -->
         <div id="playAreaView" class="hidden">
-          <!-- Winner Banner -->
           <div id="winnerBanner" class="winner-banner hidden">
-            <div style="font-family:'Outfit',sans-serif; font-size: 2rem; font-weight: 900; color:#fde68a;" id="winnerText">🏆 Match Finished!</div>
-            <p id="winnerSubtitle" style="color: #fef08a; font-size: 1.1rem; margin-bottom: 14px;"></p>
+            <div style="font-family:'Outfit',sans-serif; font-size:1.8rem; font-weight:900; color:#fde68a;" id="winnerText">🏆 Winner!</div>
+            <p id="winnerSubtitle" style="color:#fef08a; font-size:1rem; margin-bottom:12px;"></p>
             <button id="rematchBtn" class="btn btn-primary btn-lg"><span>🔄</span> Play Rematch</button>
           </div>
 
-          <!-- 1. 46-TILE WINDING SNAKES & LADDERS TRACK MAP -->
-          <div class="track-map-container">
+          <!-- DYNAMIC TRACK MAP -->
+          <div class="track-map-wrapper">
             <div class="track-map-header">
-              <h3><span>🗺️</span> 46-Tile Winding Race Track (Snakes & Ladders)</h3>
-              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); display:flex; gap: 10px;">
+              <h3 id="mapTrackTitle" style="font-size:1.1rem;"><span>🗺️</span> Winding Board Race Track</h3>
+              <div class="track-legend">
                 <span>🚩 START (#1)</span>
-                <span>🪜 Ladders (7➔33, 12➔36, 24➔42, 37➔44)</span>
-                <span>🏆 FINISH (#46)</span>
+                <span>🪜 Ladder</span>
+                <span>🕳️ Pitfall Trap</span>
+                <span>🪤 Freeze Trap</span>
+                <span>🏆 FINISH</span>
               </div>
             </div>
-            <div id="trackGridDOM" class="track-grid" aria-label="Snakes and ladders track map"></div>
+            <div id="dynamicTrackGridDOM" class="dynamic-track-grid" aria-label="Board track"></div>
           </div>
 
-          <!-- 2. GAMEPLAY CARD DRAW & CHAT BOX -->
-          <div class="gameplay-hud-grid">
-            <!-- Draw Action Card HUD -->
-            <div class="draw-action-panel">
-              <div id="turnBannerTitle" style="font-family:'Outfit',sans-serif; font-size: 1.35rem; font-weight: 800;">Player's Turn</div>
-              <div id="effectBannerDesc" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Click below to draw your UNO card!</div>
+          <!-- HUD: DRAW CARD & CHAT -->
+          <div class="gameplay-hud">
+            <!-- Draw Card Stage -->
+            <div class="draw-card-box">
+              <div id="turnBannerTitle" style="font-family:'Outfit',sans-serif; font-size:1.25rem; font-weight:800;">Player's Turn</div>
+              <div id="effectBannerDesc" style="color:var(--text-muted); font-size:0.85rem; margin-top:3px;">Draw an UNO card to move your runner!</div>
 
-              <!-- 3D Drawn Card -->
               <div id="drawnCardBox" class="drawn-card-stage card-bg-back">
-                <div class="card-oval-center"></div>
-                <div id="drawnCardValue" class="card-big-text">UNO</div>
+                <div class="card-oval"></div>
+                <div id="drawnCardValue" class="card-value-display">UNO</div>
               </div>
 
               <button id="playMoveBtn" class="btn btn-primary btn-lg btn-block">
-                <span>🎴</span> <span id="playMoveText">Draw UNO Card & Move Pawn</span>
+                <span>🎴</span> <span id="playMoveText">Draw UNO Card & Run</span>
               </button>
             </div>
 
-            <!-- In-Game Chat Box -->
-            <div class="chat-box-panel">
-              <div class="chat-header">
-                <span>💬 Table Live Chat</span>
-                <span style="font-size: 0.7rem; color: var(--text-dim)">Real-time</span>
+            <!-- Chat Box -->
+            <div class="chat-panel">
+              <div style="font-family:'Outfit',sans-serif; font-size:1rem; font-weight:800; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
+                💬 Table Live Chat
               </div>
-
-              <div id="chatStream" class="chat-stream">
-                <div style="font-size: 0.8rem; color: var(--text-dim); text-align: center;">Send a message to table players!</div>
-              </div>
-
+              <div id="chatStream" class="chat-stream"></div>
               <div class="quick-emojis">
                 <button class="emoji-pill" data-msg="🎉 Good Luck!">🎉</button>
                 <button class="emoji-pill" data-msg="💥 Knockout!">💥</button>
-                <button class="emoji-pill" data-msg="😱 Oh no!">😱</button>
+                <button class="emoji-pill" data-msg="🕳️ Fell in Pitfall!">🕳️</button>
                 <button class="emoji-pill" data-msg="🪜 Ladder climb!">🪜</button>
                 <button class="emoji-pill" data-msg="🏆 GG!">🏆</button>
               </div>
-
-              <form id="chatForm" class="chat-form">
-                <input id="chatInput" class="chat-input" maxlength="120" placeholder="Type message..." autocomplete="off">
-                <button type="submit" class="btn btn-accent" style="padding: 8px 14px;">Send</button>
+              <form id="chatForm" style="display:flex; gap:6px;">
+                <input id="chatInput" maxlength="120" placeholder="Type message..." autocomplete="off" style="flex:1; padding:6px 10px; font-size:0.85rem;">
+                <button type="submit" class="btn btn-accent" style="padding:6px 12px;">Send</button>
               </form>
             </div>
           </div>
@@ -852,15 +817,14 @@
       </div>
     </section>
 
-    <!-- Rules Guide -->
-    <details class="panel" style="padding: 16px 20px;">
-      <summary style="cursor:pointer; font-weight:700;"><span>📖</span> Game Rules: UNO Movement, Ladders & Ludo Knockout</summary>
-      <div style="margin-top: 12px; font-size: 0.9rem; line-height: 1.6; color: #cbd5e1;">
-        <p>1. <strong>UNO Draw Instead of Dice</strong>: On your turn, draw 1 card. Move your pawn forward by the card's number (0 = 10 steps, +2 = 2 steps, +4 Wild = 4 steps).</p>
-        <p>2. <strong>Action Cards</strong>: <code>SKIP</code> skips next player; <code>REVERSE</code> reverses turn order; <code>SWAP</code> exchanges pawn position with the leader!</p>
-        <p>3. <strong>💥 Ludo Knockout (Kill Rule)</strong>: If your pawn lands on a tile occupied by another player, you <strong>knock them out</strong> back to START (Tile 1) and gain +2 points!</p>
-        <p>4. <strong>🪜 Ladders</strong>: Land on a ladder base (Tiles 7, 12, 24, 37) to climb straight up to higher tiles!</p>
-        <p>5. <strong>🏆 Victory</strong>: First player to reach or enter <strong>FINISH (Tile 46)</strong> wins the game!</p>
+    <details class="panel" style="padding:14px 18px;">
+      <summary style="cursor:pointer; font-weight:700;"><span>📖</span> Game Rules: 46/100/200 Modes, Traps & Ludo Knockouts</summary>
+      <div style="margin-top:10px; font-size:0.86rem; line-height:1.55; color:#cbd5e1;">
+        <p>1. <strong>UNO Draw</strong>: Draw 1 card on your turn. Advance your runner forward by the card value (0 = 10 steps, +2 = 2 steps, +4 Wild = 4 steps).</p>
+        <p>2. <strong>🕳️ Pitfall Trap</strong>: Stepping into a pitfall sends your runner <strong>all the way back to START (Tile 1)</strong>!</p>
+        <p>3. <strong>🪤 Freeze Trap</strong>: Stepping into a freeze trap makes you <strong>miss your next card draw turn</strong>!</p>
+        <p>4. <strong>💥 Ludo Knockout</strong>: Landing on another player's tile eliminates them back to START!</p>
+        <p>5. <strong>🪜 Ladders</strong>: Climb up shortcut ladders to get ahead!</p>
       </div>
     </details>
   </main>
@@ -869,99 +833,87 @@
 
   <script>
     // ==========================================
-    // 1. EXACT 46-TILE WINDING TRACK GRID
+    // 1. DYNAMIC GRID TRACK GENERATOR (46, 100, 200)
     // ==========================================
-    const TRACK_TILES = [
-      // Bottom Row 5 (Start & Tiles 1 to 10)
-      { id: 1, x: 0, y: 5, color: 'green', type: 'start', label: 'START' },
-      { id: 2, x: 1, y: 5, color: 'yellow' },
-      { id: 3, x: 2, y: 5, color: 'orange' },
-      { id: 4, x: 3, y: 5, color: 'yellow' },
-      { id: 5, x: 4, y: 5, color: 'blue' },
-      { id: 6, x: 5, y: 5, color: 'green' },
-      { id: 7, x: 6, y: 5, color: 'pink', feature: '🪜➔33' },
-      { id: 8, x: 7, y: 5, color: 'green' },
-      { id: 9, x: 8, y: 5, color: 'green' },
-      { id: 10, x: 9, y: 5, color: 'green' },
-      // Right Column 11 (Tiles 11 to 15)
-      { id: 11, x: 11, y: 5, color: 'cyan' },
-      { id: 12, x: 11, y: 4, color: 'pink', feature: '🪜➔36' },
-      { id: 13, x: 11, y: 3, color: 'orange' },
-      { id: 14, x: 11, y: 2, color: 'green' },
-      { id: 15, x: 11, y: 1, color: 'orange' },
-      // Top Row 0 (Tiles 16 to 23)
-      { id: 16, x: 11, y: 0, color: 'pink' },
-      { id: 17, x: 10, y: 0, color: 'orange' },
-      { id: 18, x: 9, y: 0, color: 'blue' },
-      { id: 19, x: 8, y: 0, color: 'yellow' },
-      { id: 20, x: 7, y: 0, color: 'yellow' },
-      { id: 21, x: 6, y: 0, color: 'orange' },
-      { id: 22, x: 5, y: 0, color: 'pink' },
-      { id: 23, x: 4, y: 0, color: 'green' },
-      // Left Column 0 (Tiles 24 to 28)
-      { id: 24, x: 2, y: 0, color: 'cyan', feature: '🪜➔42' },
-      { id: 25, x: 1, y: 1, color: 'yellow' },
-      { id: 26, x: 1, y: 2, color: 'orange' },
-      { id: 27, x: 1, y: 3, color: 'cyan' },
-      { id: 28, x: 1, y: 4, color: 'green' },
-      // Bottom Inner Row 4 (Tiles 29 to 35)
-      { id: 29, x: 2, y: 4, color: 'pink' },
-      { id: 30, x: 3, y: 4, color: 'orange' },
-      { id: 31, x: 4, y: 4, color: 'yellow' },
-      { id: 32, x: 5, y: 4, color: 'cyan' },
-      { id: 33, x: 6, y: 4, color: 'green', feature: '🪜' },
-      { id: 34, x: 7, y: 4, color: 'yellow' },
-      { id: 35, x: 8, y: 4, color: 'orange' },
-      // Right Inner Column 9 (Tiles 36 to 38)
-      { id: 36, x: 9, y: 3, color: 'orange', feature: '🪜' },
-      { id: 37, x: 9, y: 2, color: 'orange', feature: '🪜➔44' },
-      { id: 38, x: 9, y: 1, color: 'pink' },
-      // Top Inner Row 1 (Tiles 39 to 42)
-      { id: 39, x: 7, y: 1, color: 'yellow' },
-      { id: 40, x: 6, y: 1, color: 'orange' },
-      { id: 41, x: 5, y: 1, color: 'green' },
-      { id: 42, x: 4, y: 1, color: 'orange', feature: '🪜' },
-      // Center Finish Stage (Tiles 43 to 46)
-      { id: 43, x: 3, y: 2, color: 'yellow' },
-      { id: 44, x: 4, y: 3, color: 'cyan', feature: '🪜' },
-      { id: 45, x: 5, y: 3, color: 'pink' },
-      { id: 46, x: 6, y: 2, color: 'yellow', type: 'finish', label: 'FINISH' }
-    ];
+    function generateTrackTiles(total = 46, ladders = {}, snakes = {}, pitfalls = [], freezes = []) {
+      const tiles = [];
+      let cols = 12, rows = 6;
+      if (total === 100) { cols = 10; rows = 10; }
+      else if (total === 200) { cols = 15; rows = 14; }
 
-    function initTrackGridDOM() {
-      const grid = document.getElementById('trackGridDOM');
-      grid.replaceChildren();
+      for (let i = 1; i <= total; i++) {
+        // Serpentine row-column coordinates
+        let r, c;
+        if (total === 46) {
+          // Exact loop coordinates for 46 tiles
+          const map46 = [
+            [0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[11,5],
+            [11,4],[11,3],[11,2],[11,1],[11,0],[10,0],[9,0],[8,0],[7,0],[6,0],[5,0],[4,0],
+            [2,0],[1,1],[1,2],[1,3],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],
+            [9,3],[9,2],[9,1],[7,1],[6,1],[5,1],[4,1],[3,2],[4,3],[5,3],[6,2]
+          ];
+          const coord = map46[i - 1] || [0, 0];
+          c = coord[0]; r = coord[1];
+        } else {
+          // Boustrophedon / serpentine grid for 100 & 200 tiles
+          const rowFromBottom = Math.floor((i - 1) / cols);
+          r = rows - 1 - rowFromBottom;
+          const colInRow = (i - 1) % cols;
+          c = (rowFromBottom % 2 === 0) ? colInRow : (cols - 1 - colInRow);
+        }
 
-      TRACK_TILES.forEach(tile => {
+        let type = 'normal';
+        let feat = '';
+        if (i === 1) { type = 'start'; feat = '🚩'; }
+        else if (i === total) { type = 'finish'; feat = '🏆'; }
+        else if (ladders[i]) { feat = '🪜➔' + ladders[i]; }
+        else if (snakes[i]) { feat = '🐍➔' + snakes[i]; }
+        else if (pitfalls.includes(i)) { type = 'trap-pitfall'; feat = '🕳️'; }
+        else if (freezes.includes(i)) { type = 'trap-freeze'; feat = '🪤'; }
+
+        tiles.push({ id: i, x: c, y: r, colorIndex: (i % 6), type, feature: feat });
+      }
+      return { tiles, cols, rows };
+    }
+
+    function renderDynamicBoardDOM(total = 46, ladders = {}, snakes = {}, pitfalls = [], freezes = []) {
+      const container = document.getElementById('dynamicTrackGridDOM');
+      container.className = `dynamic-track-grid grid-mode-${total}`;
+      container.replaceChildren();
+
+      const { tiles } = generateTrackTiles(total, ladders, snakes, pitfalls, freezes);
+
+      tiles.forEach(t => {
         const el = document.createElement('div');
-        el.id = 'track-tile-' + tile.id;
-        const colorClass = 'tile-color-' + (tile.color || 'yellow');
-        el.className = `map-tile ${colorClass}` + 
-          (tile.type === 'start' ? ' tile-start-gate' : '') +
-          (tile.type === 'finish' ? ' tile-finish-gate' : '');
+        el.id = 'track-tile-' + t.id;
+        el.className = `map-tile tile-c-${t.colorIndex}` + 
+          (t.type === 'start' ? ' tile-start' : '') +
+          (t.type === 'finish' ? ' tile-finish' : '') +
+          (t.type === 'trap-pitfall' ? ' tile-trap-pitfall' : '') +
+          (t.type === 'trap-freeze' ? ' tile-trap-freeze' : '');
 
-        el.style.gridColumn = (tile.x + 1) + ' / span 1';
-        el.style.gridRow = (tile.y + 1) + ' / span 1';
+        el.style.gridColumn = (t.x + 1) + ' / span 1';
+        el.style.gridRow = (t.y + 1) + ' / span 1';
 
         const num = document.createElement('div');
-        num.className = 'tile-number';
-        num.textContent = tile.label || tile.id;
+        num.className = 'tile-num-text';
+        num.textContent = t.id === 1 ? 'START' : (t.id === total ? 'FINISH' : t.id);
 
         const feat = document.createElement('div');
-        feat.className = 'tile-feature-icon';
-        feat.textContent = tile.feature || '';
+        feat.className = 'tile-feature-badge';
+        feat.textContent = t.feature;
 
-        const slot = document.createElement('div');
-        slot.id = 'pawn-slot-' + tile.id;
-        slot.className = 'tile-pawns-slot';
+        const pawnsRow = document.createElement('div');
+        pawnsRow.id = 'pawn-slot-' + t.id;
+        pawnsRow.className = 'tile-pawns-row';
 
-        el.append(num, feat, slot);
-        grid.append(el);
+        el.append(num, feat, pawnsRow);
+        container.append(el);
       });
     }
 
     // ==========================================
-    // 2. SOUND SYNTHESIZER
+    // 2. SOUND SYSTEM
     // ==========================================
     class SoundFX {
       constructor() {
@@ -984,11 +936,7 @@
       }
       updateUI() {
         const icon = document.getElementById('soundIcon');
-        const label = document.getElementById('soundLabel');
-        if (icon && label) {
-          icon.textContent = this.muted ? '🔇' : '🔊';
-          label.textContent = this.muted ? 'Muted' : 'Sound';
-        }
+        if (icon) icon.textContent = this.muted ? '🔇' : '🔊';
       }
       playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.15) {
         if (this.muted) return;
@@ -1007,29 +955,33 @@
           osc.stop(this.ctx.currentTime + duration);
         } catch {}
       }
-      playHop() {
+      playStep() {
         if (this.muted) return;
-        this.playTone(440, 'sine', 0.08, 0.2);
-        setTimeout(() => this.playTone(660, 'triangle', 0.1, 0.2), 35);
+        this.playTone(480, 'sine', 0.07, 0.18);
+        setTimeout(() => this.playTone(720, 'triangle', 0.08, 0.2), 30);
+      }
+      playTrap() {
+        if (this.muted) return;
+        this.playTone(300, 'sawtooth', 0.2, 0.3);
+        setTimeout(() => this.playTone(180, 'sawtooth', 0.35, 0.35), 70);
       }
       playCardFlip() {
         if (this.muted) return;
         this.playTone(520, 'triangle', 0.08, 0.2);
-        setTimeout(() => this.playTone(780, 'sine', 0.15, 0.25), 60);
+        setTimeout(() => this.playTone(800, 'sine', 0.14, 0.25), 50);
       }
       playKnockout() {
         if (this.muted) return;
-        this.playTone(250, 'sawtooth', 0.2, 0.3);
-        setTimeout(() => this.playTone(150, 'sawtooth', 0.3, 0.35), 80);
+        this.playTone(220, 'sawtooth', 0.2, 0.35);
       }
       playLadder() {
         if (this.muted) return;
-        [400, 500, 600, 750].forEach((f, i) => setTimeout(() => this.playTone(f, 'sine', 0.1, 0.2), i * 60));
+        [400, 520, 660, 820].forEach((f, i) => setTimeout(() => this.playTone(f, 'sine', 0.09, 0.2), i * 50));
       }
       playClick() { this.playTone(880, 'sine', 0.04, 0.1); }
       playVictory() {
         if (this.muted) return;
-        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => this.playTone(f, 'triangle', 0.3, 0.25), i * 120));
+        [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => this.playTone(f, 'triangle', 0.3, 0.25), i * 110));
       }
     }
 
@@ -1051,8 +1003,8 @@
       resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; }
       start() {
         this.particles = [];
-        const colors = ['#facc15', '#38bdf8', '#4ade80', '#f87171', '#c084fc', '#fb923c', '#f472b6'];
-        for (let i = 0; i < 150; i++) {
+        const colors = ['#facc15', '#38bdf8', '#4ade80', '#f87171', '#c084fc', '#fb923c'];
+        for (let i = 0; i < 160; i++) {
           this.particles.push({
             x: window.innerWidth * Math.random(),
             y: -20 - Math.random() * 200,
@@ -1099,12 +1051,15 @@
     let isBusy = false;
     let isAnimating = false;
     let lastAnimatedMoveNumber = 0;
+    let currentRenderedTrackLength = 0;
     const playerPawnElements = new Map();
 
-    try { auth = JSON.parse(sessionStorage.getItem('uno_snakes_auth') || 'null'); } catch {}
+    const playerHueColors = ['#facc15', '#38bdf8', '#4ade80', '#f87171', '#c084fc', '#fb923c', '#f472b6', '#a3e635'];
+
+    try { auth = JSON.parse(sessionStorage.getItem('uno_race_auth') || 'null'); } catch {}
 
     function saveAuth() {
-      try { sessionStorage.setItem('uno_snakes_auth', JSON.stringify(auth)); } catch {}
+      try { sessionStorage.setItem('uno_race_auth', JSON.stringify(auth)); } catch {}
     }
 
     function toast(message) {
@@ -1125,15 +1080,13 @@
 
       let res;
       try { res = await fetch(url, options); } catch {
-        throw new Error('Connection error. Please check your internet.');
+        throw new Error('Connection error.');
       }
-
       const raw = await res.text();
       let json;
       try { json = JSON.parse(raw); } catch {
-        throw new Error('Backend returned unexpected format.');
+        throw new Error('Backend returned invalid response.');
       }
-
       if (!res.ok) throw new Error(json.error || 'Request failed.');
       return json;
     }
@@ -1150,7 +1103,6 @@
           version: state?.version,
           ...payload
         });
-
         if (out.token) {
           auth = { token: out.token, room: out.state.code };
           saveAuth();
@@ -1177,49 +1129,48 @@
       }
     }
 
-    // Step 1: 3D Card Flip Animation -> Step 2: Pawn Hopping along 46 tiles -> Step 3: Knockout or Ladder Climb
+    // Step-by-Step 3D Character "Man" Runner Animation
     async function triggerTurnAnimation(move) {
       isAnimating = true;
       renderUI();
 
-      // 1. Flip card on screen
-      const cardBox = $('drawnCardBox');
-      const cardVal = $('drawnCardValue');
       const card = move.card;
-
       if (card) {
         sound.playCardFlip();
+        const cardBox = $('drawnCardBox');
         cardBox.className = `drawn-card-stage card-bg-${card.color === 'wild' ? 'wild' : card.color}`;
-        cardVal.textContent = card.value;
-        await new Promise(r => setTimeout(r, 400));
+        $('drawnCardValue').textContent = card.value;
+        await new Promise(r => setTimeout(r, 380));
       }
 
-      // 2. Step by step Pawn Hop
       if (move.prevPos !== undefined && move.newPos !== undefined) {
         const seat = move.seat;
         const initial = (state?.players[seat]?.name || 'P')[0].toUpperCase();
         let cur = move.prevPos;
         const target = move.newPos;
+        const totalTiles = state?.options?.totalTiles || 46;
 
-        while (cur < target && cur < 46) {
+        // Animate running step by step
+        while (cur < target && cur < totalTiles) {
           cur++;
-          updatePawnSlot(seat, cur, initial, true);
-          sound.playHop();
-          await new Promise(r => setTimeout(r, 140));
+          updateManPawnSlot(seat, cur, initial, true);
+          sound.playStep();
+          await new Promise(r => setTimeout(r, 130));
         }
 
-        // Ladder Climb sound
-        if (move.effect.includes('LADDER')) {
+        if (move.effect.includes('TRAP')) {
+          sound.playTrap();
+          toast(move.effect);
+        } else if (move.effect.includes('LADDER')) {
           sound.playLadder();
         }
 
-        // Knockout Sound
         if (move.knockouts && move.knockouts.length > 0) {
           sound.playKnockout();
           toast(`💥 KNOCKOUT! ${move.knockouts[0].killerName} sent ${move.knockouts[0].victimName} back to START!`);
         }
 
-        if (target >= 46) {
+        if (target >= totalTiles) {
           sound.playVictory();
           confetti.start();
         }
@@ -1234,23 +1185,41 @@
       renderUI();
     }
 
-    function updatePawnSlot(seat, tileId, initial, isHopping = false) {
-      const slot = document.getElementById('pawn-slot-' + Math.min(46, Math.max(1, tileId)));
+    function updateManPawnSlot(seat, tileId, initial, isRunning = false) {
+      const totalTiles = state?.options?.totalTiles || 46;
+      const slot = document.getElementById('pawn-slot-' + Math.min(totalTiles, Math.max(1, tileId)));
       if (!slot) return;
 
       let pawn = playerPawnElements.get(seat);
       if (!pawn) {
         pawn = document.createElement('div');
+        pawn.className = 'runner-man-pawn';
+
+        const head = document.createElement('div');
+        head.className = 'man-head';
+
+        const body = document.createElement('div');
+        body.className = 'man-body';
+
+        const legs = document.createElement('div');
+        legs.className = 'man-legs';
+        const leg1 = document.createElement('div');
+        leg1.className = 'man-leg';
+        const leg2 = document.createElement('div');
+        leg2.className = 'man-leg';
+        legs.append(leg1, leg2);
+
+        pawn.append(head, body, legs);
         playerPawnElements.set(seat, pawn);
       }
 
-      pawn.className = `track-pawn pcolor-${seat % 8}` + (isHopping ? ' pawn-hopping' : '');
-      pawn.textContent = initial;
-      pawn.title = `Player ${seat + 1}`;
+      pawn.style.color = playerHueColors[seat % 8];
+      pawn.querySelector('.man-head').textContent = initial;
+      pawn.classList.toggle('man-running', isRunning);
       slot.appendChild(pawn);
 
-      if (isHopping) {
-        setTimeout(() => pawn.classList.remove('pawn-hopping'), 150);
+      if (isRunning) {
+        setTimeout(() => pawn.classList.remove('man-running'), 140);
       }
     }
 
@@ -1279,6 +1248,20 @@
 
       const s = state;
       const isHost = s.you === 0;
+      const totalTiles = s.options?.totalTiles || 46;
+
+      // Re-render board grid if track length changed
+      if (currentRenderedTrackLength !== totalTiles) {
+        currentRenderedTrackLength = totalTiles;
+        $('mapTrackTitle').innerHTML = `<span>🗺️</span> ${totalTiles}-Tile Track Map (${totalTiles === 46 ? 'Quick Match' : (totalTiles === 100 ? 'Championship' : 'Grand Marathon')})`;
+        renderDynamicBoardDOM(
+          totalTiles,
+          s.options.ladders || {},
+          s.options.snakes || {},
+          s.options.pitfallTraps || [],
+          s.options.freezeTraps || []
+        );
+      }
 
       $('roomCodeDisplay').textContent = s.code;
 
@@ -1295,51 +1278,44 @@
         row1.style.display = 'flex';
         row1.style.alignItems = 'center';
         row1.style.justifyContent = 'space-between';
-        row1.style.gap = '6px';
-
-        const nameWrap = document.createElement('div');
-        nameWrap.style.display = 'flex';
-        nameWrap.style.alignItems = 'center';
-        nameWrap.style.gap = '6px';
-
-        const av = document.createElement('div');
-        av.className = `pawn-avatar pcolor-${index % 8}`;
-        av.textContent = (p.name || 'P')[0].toUpperCase();
 
         const name = document.createElement('strong');
-        name.style.fontSize = '0.9rem';
+        name.style.fontSize = '0.85rem';
+        name.className = `pcolor-${index % 8}`;
         name.textContent = p.name;
 
-        nameWrap.append(av, name);
-        row1.append(nameWrap);
+        const posBadge = document.createElement('span');
+        posBadge.style.fontSize = '0.75rem';
+        posBadge.style.fontFamily = 'JetBrains Mono';
+        posBadge.style.color = '#38bdf8';
+        posBadge.textContent = `#${p.position || 1}/${totalTiles}`;
+
+        row1.append(name, posBadge);
 
         const row2 = document.createElement('div');
         row2.style.display = 'flex';
         row2.style.alignItems = 'center';
         row2.style.justifyContent = 'space-between';
+        row2.style.fontSize = '0.72rem';
 
-        const posBadge = document.createElement('span');
-        posBadge.className = 'player-pos-badge';
-        posBadge.textContent = `Tile #${p.position || 1}/46`;
+        const scoreText = document.createElement('span');
+        scoreText.textContent = `${p.score} PTS`;
 
-        const killBadge = document.createElement('span');
-        killBadge.className = 'player-kill-badge';
-        killBadge.textContent = p.kills > 0 ? `💥 ${p.kills}` : '';
+        const trapStatus = document.createElement('span');
+        if (p.missTurns > 0) {
+          trapStatus.style.color = '#38bdf8';
+          trapStatus.textContent = '❄️ Frozen';
+        } else if (p.kills > 0) {
+          trapStatus.style.color = '#f87171';
+          trapStatus.textContent = `💥 ${p.kills} Kills`;
+        }
 
-        row2.append(posBadge, killBadge);
-
-        const prog = document.createElement('div');
-        prog.className = 'track-mini-progress';
-        const fill = document.createElement('div');
-        fill.className = `track-mini-fill pcolor-${index % 8}`;
-        fill.style.width = Math.min(100, Math.round(((p.position || 1) / 46) * 100)) + '%';
-        prog.append(fill);
-
-        card.append(row1, row2, prog);
+        row2.append(scoreText, trapStatus);
+        card.append(row1, row2);
         roster.append(card);
 
         if (!isAnimating) {
-          updatePawnSlot(index, p.position || 1, (p.name || 'P')[0].toUpperCase());
+          updateManPawnSlot(index, p.position || 1, (p.name || 'P')[0].toUpperCase());
         }
       });
 
@@ -1348,7 +1324,6 @@
       $('lobbyView').classList.toggle('hidden', !isLobby);
       $('playAreaView').classList.toggle('hidden', isLobby);
 
-      // RPS controls
       if (isLobby) {
         const myChoice = s.players[s.you]?.rps;
         document.querySelectorAll('.rps-btn').forEach(btn => {
@@ -1358,8 +1333,8 @@
         });
 
         $('rpsStatusText').textContent = s.players[s.you]?.ready
-          ? `✓ Choice selected (${myChoice.toUpperCase()}). Waiting for host!`
-          : '👉 Pick Rock, Paper, or Scissors above.';
+          ? `✓ Choice saved (${myChoice.toUpperCase()}). Waiting for host!`
+          : '👉 Pick Rock, Paper, or Scissors.';
 
         $('startGameBtn').classList.toggle('hidden', !isHost || s.players.length <= 1);
         $('practiceGameBtn').classList.toggle('hidden', !isHost || s.players.length > 1);
@@ -1367,7 +1342,6 @@
         $('practiceGameBtn').disabled = isBusy || !s.players[0].ready;
       }
 
-      // Play Area HUD
       if (!isLobby) {
         const isFinished = s.phase === 'finished';
         const winnerBanner = $('winnerBanner');
@@ -1375,17 +1349,21 @@
 
         if (isFinished) {
           const winners = s.winners.map(idx => s.players[idx]?.name).filter(Boolean).join(' & ');
-          $('winnerText').textContent = `🏆 ${winners} Wins the Race!`;
-          $('winnerSubtitle').textContent = 'Reached the center FINISH line!';
+          $('winnerText').textContent = `🏆 ${winners} Won the Race!`;
+          $('winnerSubtitle').textContent = `Reached the FINISH line on the ${totalTiles}-Tile Track!`;
           $('rematchBtn').classList.toggle('hidden', !isHost);
           $('rematchBtn').disabled = isBusy;
         }
 
         const activeP = s.players[s.turn];
         if (isFinished) {
-          $('turnBannerTitle').textContent = '🏁 Game Finished!';
+          $('turnBannerTitle').textContent = '🏁 Match Finished!';
         } else if (s.turn === s.you) {
-          $('turnBannerTitle').textContent = '🔥 It\'s Your Turn to Draw!';
+          if (activeP.missTurns > 0) {
+            $('turnBannerTitle').textContent = '❄️ You are Frozen! Pass turn.';
+          } else {
+            $('turnBannerTitle').textContent = '🔥 It\'s Your Turn to Run!';
+          }
         } else {
           $('turnBannerTitle').textContent = `${activeP?.name || 'Player'}'s Turn`;
         }
@@ -1394,41 +1372,20 @@
           $('effectBannerDesc').textContent = `${s.lastMove.effect}`;
         }
 
-        // Draw Card Button
         const playBtn = $('playMoveBtn');
         playBtn.classList.toggle('hidden', isFinished);
         playBtn.disabled = isBusy || isAnimating || s.turn !== s.you || s.phase !== 'playing';
-        $('playMoveText').textContent = isAnimating ? 'Drawing Card & Moving...' : 'Draw UNO Card & Move Pawn';
+        $('playMoveText').textContent = isAnimating ? 'Drawing & Running...' : (activeP?.missTurns > 0 ? 'Pass Frozen Turn' : 'Draw UNO Card & Run');
       }
 
-      // Render Chat Stream
+      // Chat
       const chatStream = $('chatStream');
       chatStream.replaceChildren();
-      if (!s.chat || !s.chat.length) {
-        const empty = document.createElement('div');
-        empty.style.fontSize = '0.8rem';
-        empty.style.color = 'var(--text-dim)';
-        empty.style.textAlign = 'center';
-        empty.textContent = 'No messages yet.';
-        chatStream.append(empty);
-      } else {
+      if (s.chat && s.chat.length) {
         s.chat.forEach(msg => {
           const el = document.createElement('div');
           el.className = 'chat-msg';
-
-          const sender = document.createElement('span');
-          sender.className = 'chat-sender';
-          sender.style.color = msg.color || '#38bdf8';
-          sender.textContent = msg.sender + ':';
-
-          const txt = document.createElement('span');
-          txt.textContent = msg.text;
-
-          const time = document.createElement('span');
-          time.className = 'chat-time';
-          time.textContent = msg.time;
-
-          el.append(sender, txt, time);
+          el.innerHTML = `<strong style="color:${msg.color || '#38bdf8'}">${msg.sender}:</strong> ${msg.text} <span style="float:right; color:var(--text-dim); font-size:0.68rem;">${msg.time}</span>`;
           chatStream.append(el);
         });
         chatStream.scrollTop = chatStream.scrollHeight;
@@ -1438,11 +1395,10 @@
     // ==========================================
     // 6. DOM EVENT BINDINGS
     // ==========================================
-    initTrackGridDOM();
-
     $('createRoomBtn').onclick = () => {
       const name = $('nameInput').value.trim();
-      executeAction('create', { name });
+      const trackLength = Number($('trackLengthSelect').value);
+      executeAction('create', { name, options: { trackLength } });
     };
 
     $('joinRoomBtn').onclick = () => {
@@ -1461,7 +1417,6 @@
     $('playMoveBtn').onclick = () => executeAction('play');
     $('rematchBtn').onclick = () => executeAction('rematch');
 
-    // Send In-Game Chat Message
     $('chatForm').onsubmit = async (e) => {
       e.preventDefault();
       const input = $('chatInput');
@@ -1502,7 +1457,7 @@
       if (!confirm('Leave table?')) return;
       state = null;
       auth = null;
-      sessionStorage.removeItem('uno_snakes_auth');
+      sessionStorage.removeItem('uno_race_auth');
       renderUI();
     };
 

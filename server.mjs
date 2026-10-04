@@ -8,7 +8,6 @@ const PORT = Number(process.env.PORT || 3000);
 const rooms = new Map();
 const MAX_ROOMS = 500;
 const MAX_PLAYERS = 8; // Supports up to 8 players!
-const TOTAL_TRACK_TILES = 46; // Track from START (1) to FINISH (46)
 
 const colors = ['red', 'blue', 'green', 'yellow'];
 const playerColors = [
@@ -22,20 +21,35 @@ const playerColors = [
   '#a3e635'  // 7: Electric Lime
 ];
 
-// Ladders & Shortcuts (as in image)
-const LADDERS = {
-  7: 33,
-  12: 36,
-  24: 42,
-  37: 44
-};
-
-// Snakes / Slides
-const SNAKES = {
-  27: 8,
-  43: 29,
-  45: 30
-};
+function getTrackConfig(length = 46) {
+  const len = [46, 100, 200].includes(Number(length)) ? Number(length) : 46;
+  if (len === 100) {
+    return {
+      totalTiles: 100,
+      ladders: { 4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81, 71: 91 },
+      snakes: { 17: 7, 54: 34, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 99: 78 },
+      pitfallTraps: [18, 38, 58, 78, 92], // Back to START (Tile 1) 🕳️
+      freezeTraps: [12, 26, 46, 68, 86]    // Miss a Turn (Freeze) 🪤
+    };
+  }
+  if (len === 200) {
+    return {
+      totalTiles: 200,
+      ladders: { 10: 35, 25: 60, 45: 85, 70: 120, 95: 140, 130: 175, 160: 192 },
+      snakes: { 38: 15, 65: 30, 90: 50, 125: 75, 155: 105, 185: 140, 198: 165 },
+      pitfallTraps: [28, 58, 88, 118, 148, 178, 195], // Back to START 🕳️
+      freezeTraps: [18, 42, 72, 102, 132, 162, 188]   // Miss a Turn 🪤
+    };
+  }
+  // Default 46 tiles
+  return {
+    totalTiles: 46,
+    ladders: { 7: 33, 12: 36, 24: 42, 37: 44 },
+    snakes: { 27: 8, 43: 29, 45: 30 },
+    pitfallTraps: [15, 28, 41], // Back to START 🕳️
+    freezeTraps: [9, 23, 35]    // Miss a Turn 🪤
+  };
+}
 
 const fail = (message, status = 400) => {
   const err = new Error(message);
@@ -51,12 +65,14 @@ function nameOf(value) {
 }
 
 function optionsOf(x = {}) {
+  const trackLen = [46, 100, 200].includes(Number(x.trackLength)) ? Number(x.trackLength) : 46;
   return {
-    boardSize: 46,
+    trackLength: trackLen,
     zeroCount: 10,
     laddersEnabled: x.laddersEnabled !== false,
     killEnabled: x.killEnabled !== false,
-    swapEnabled: x.swapEnabled !== false
+    swapEnabled: x.swapEnabled !== false,
+    trapsEnabled: x.trapsEnabled !== false
   };
 }
 
@@ -68,6 +84,7 @@ function addPlayer(room, name) {
     score: 0,
     position: 1, // Starts at Tile 1 (START)
     kills: 0,
+    missTurns: 0,
     rps: null,
     color: playerColors[seat % playerColors.length],
     lastSeen: Date.now()
@@ -82,7 +99,6 @@ function requirePlayer(room, id) {
   return p;
 }
 
-// Generate full UNO Draw Deck
 function createUnoDeck() {
   const deck = [];
   let id = 1;
@@ -97,11 +113,9 @@ function createUnoDeck() {
     deck.push({ id: id++, value: 'SWAP', color: col, type: 'swap', steps: 0 });
     deck.push({ id: id++, value: '+2', color: col, type: 'bonus', steps: 2 });
   });
-  // Wild +4 cards
   for (let w = 0; w < 4; w++) {
     deck.push({ id: id++, value: '+4 WILD', color: 'wild', type: 'wild', steps: 4 });
   }
-  // Shuffle deck
   for (let i = deck.length - 1; i > 0; i--) {
     const j = randomInt(i + 1);
     [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -110,12 +124,20 @@ function createUnoDeck() {
 }
 
 function snapshot(room, viewer) {
+  const cfg = getTrackConfig(room.options.trackLength);
   const maxPos = room.players.length ? Math.max(...room.players.map(q => q.position || 1)) : 1;
   return {
     code: room.code,
     phase: room.phase,
     version: room.version,
-    options: { ...room.options, totalTiles: TOTAL_TRACK_TILES },
+    options: {
+      ...room.options,
+      totalTiles: cfg.totalTiles,
+      ladders: cfg.ladders,
+      snakes: cfg.snakes,
+      pitfallTraps: cfg.pitfallTraps,
+      freezeTraps: cfg.freezeTraps
+    },
     you: viewer,
     host: 0,
     turn: room.turn,
@@ -131,6 +153,7 @@ function snapshot(room, viewer) {
       score: p.score,
       position: p.position || 1,
       kills: p.kills || 0,
+      missTurns: p.missTurns || 0,
       color: p.color || playerColors[i % playerColors.length],
       ready: !!p.rps,
       rps: room.phase === 'finished' ? p.rps : (i === viewer ? p.rps : (p.rps ? 'ready' : null)),
@@ -138,7 +161,7 @@ function snapshot(room, viewer) {
     })),
     winners: room.phase === 'finished'
       ? room.players.map((p, i) => ({ seat: i, position: p.position || 1, kills: p.kills || 0 }))
-          .filter(p => p.position >= TOTAL_TRACK_TILES || p.position === maxPos)
+          .filter(p => p.position >= cfg.totalTiles || p.position === maxPos)
           .map(p => p.seat)
       : []
   };
@@ -184,12 +207,13 @@ function start(room) {
     fail('Every player must choose rock, paper, or scissors first.');
   }
   room.deck = createUnoDeck();
-  room.direction = 1; // 1 = clockwise, -1 = counter-clockwise
+  room.direction = 1;
   room.drawnCard = null;
   room.players.forEach(p => {
     p.score = 0;
     p.position = 1; // Start at tile 1
     p.kills = 0;
+    p.missTurns = 0;
   });
   room.turn = starter(room.players);
   room.phase = 'playing';
@@ -202,25 +226,43 @@ function play(room, seat) {
   if (room.phase !== 'playing') fail('The game is not in progress.');
   if (room.turn !== seat) fail('Wait for your turn.', 409);
 
-  // Ensure deck has cards
+  const cfg = getTrackConfig(room.options.trackLength);
+  const p = room.players[seat];
+  const dir = room.direction || 1;
+  let nextSeat = (seat + dir + room.players.length) % room.players.length;
+
+  // 1. Check if player is frozen by a Freeze Trap
+  if (p.missTurns > 0) {
+    p.missTurns--;
+    room.turn = nextSeat;
+    room.lastMove = {
+      number: room.version + 1,
+      seat,
+      card: null,
+      prevPos: p.position,
+      newPos: p.position,
+      steps: 0,
+      effect: `❄️ ${p.name} is trapped in a Freeze Trap and missed their turn!`,
+      knockouts: []
+    };
+    note(room, `❄️ ${p.name} was trapped and missed their card draw!`);
+    return;
+  }
+
   if (!room.deck || room.deck.length === 0) {
     room.deck = createUnoDeck();
   }
 
-  // DRAW 1 UNO CARD
   const card = room.deck.pop();
   room.drawnCard = card;
 
-  const p = room.players[seat];
   const prevPos = p.position || 1;
   let steps = card.steps;
   let effect = '';
   let ladderEffect = '';
   let snakeEffect = '';
+  let trapEffect = '';
   let knockouts = [];
-
-  const dir = room.direction || 1;
-  let nextSeat = (seat + dir + room.players.length) % room.players.length;
 
   if (card.type === 'skip') {
     nextSeat = (seat + dir * 2 + room.players.length * 2) % room.players.length;
@@ -231,7 +273,6 @@ function play(room, seat) {
     effect = `🔁 REVERSE Card! Turn order reversed.`;
   } else if (card.type === 'swap') {
     if (room.options.swapEnabled && room.players.length > 1) {
-      // Find the player in the lead
       const opponents = room.players.filter((_, idx) => idx !== seat);
       const leader = opponents.reduce((prev, curr) => (curr.position > prev.position ? curr : prev), opponents[0]);
       if (leader) {
@@ -244,33 +285,45 @@ function play(room, seat) {
       effect = 'Score swap is disabled or solo mode.';
     }
   } else {
-    // Number / Bonus / Wild card
-    let newPos = Math.min(TOTAL_TRACK_TILES, prevPos + steps);
+    let newPos = Math.min(cfg.totalTiles, prevPos + steps);
     p.position = newPos;
     effect = `Drawn ${card.color.toUpperCase()} ${card.value} ➔ Moved +${steps} tiles to Tile #${newPos}.`;
 
     // 1. Check Ladder climb
-    if (room.options.laddersEnabled && LADDERS[p.position]) {
-      const ladderDest = LADDERS[p.position];
-      ladderEffect = ` 🪜 LADDER CLIMBED! Jumped from Tile #${p.position} ➔ Tile #${ladderDest}!`;
-      p.position = ladderDest;
+    if (room.options.laddersEnabled && cfg.ladders[p.position]) {
+      const dest = cfg.ladders[p.position];
+      ladderEffect = ` 🪜 LADDER CLIMBED! Jumped from Tile #${p.position} ➔ Tile #${dest}!`;
+      p.position = dest;
     }
 
     // 2. Check Snake slide
-    if (SNAKES[p.position]) {
-      const snakeDest = SNAKES[p.position];
-      snakeEffect = ` 🐍 SLID DOWN! Slid from Tile #${p.position} ➔ Tile #${snakeDest}.`;
-      p.position = snakeDest;
+    if (cfg.snakes[p.position]) {
+      const dest = cfg.snakes[p.position];
+      snakeEffect = ` 🐍 SLID DOWN! Slid from Tile #${p.position} ➔ Tile #${dest}.`;
+      p.position = dest;
     }
 
-    // 3. LUDO KNOCKOUT (KILL) RULE
-    // If you land on another player's tile (except START 1 or FINISH 46), eliminate them back to START!
-    if (room.options.killEnabled && p.position > 1 && p.position < TOTAL_TRACK_TILES) {
+    // 3. Check TRAP TILES
+    if (room.options.trapsEnabled) {
+      // Pitfall Trap (🕳️ sends pawn back to START)
+      if (cfg.pitfallTraps.includes(p.position)) {
+        trapEffect += ` 🕳️ PITFALL TRAP! ${p.name} fell into a pit on Tile #${p.position} and was sent back to START!`;
+        p.position = 1;
+      }
+      // Freeze Trap (🪤 miss next turn chance)
+      else if (cfg.freezeTraps.includes(p.position)) {
+        p.missTurns = 1;
+        trapEffect += ` 🪤 FREEZE TRAP! Stepped into a trap on Tile #${p.position}! Will miss next card draw chance!`;
+      }
+    }
+
+    // 4. LUDO KNOCKOUT (KILL) RULE
+    if (room.options.killEnabled && p.position > 1 && p.position < cfg.totalTiles) {
       room.players.forEach((target, targetIdx) => {
         if (targetIdx !== seat && target.position === p.position) {
-          target.position = 1; // Send victim back to START
+          target.position = 1;
           p.kills = (p.kills || 0) + 1;
-          p.score += 2; // +2 bonus points for knockout!
+          p.score += 2;
           knockouts.push({
             victimSeat: targetIdx,
             victimName: target.name,
@@ -295,41 +348,30 @@ function play(room, seat) {
     prevPos,
     newPos: p.position,
     steps,
-    effect: `${effect}${ladderEffect}${snakeEffect}`,
+    effect: `${effect}${ladderEffect}${snakeEffect}${trapEffect}`,
     knockouts
   };
 
-  note(room, `${p.name} drew [${card.color.toUpperCase()} ${card.value}] ➔ ${effect}${ladderEffect}${snakeEffect}`);
+  note(room, `${p.name} drew [${card.color.toUpperCase()} ${card.value}] ➔ ${effect}${ladderEffect}${snakeEffect}${trapEffect}`);
 
-  // Check victory (reached or passed FINISH tile 46)
-  if (p.position >= TOTAL_TRACK_TILES) {
-    p.position = TOTAL_TRACK_TILES;
+  if (p.position >= cfg.totalTiles) {
+    p.position = cfg.totalTiles;
     room.phase = 'finished';
     note(room, `🏆 ${p.name} REACHED THE FINISH LINE! WINNER!`);
   }
 }
 
 async function parseBody(req) {
-  if (req.body && typeof req.body === 'object') {
-    return req.body;
-  }
+  if (req.body && typeof req.body === 'object') return req.body;
   if (typeof req.body === 'string') {
-    try {
-      return JSON.parse(req.body);
-    } catch {
-      fail('Invalid JSON.');
-    }
+    try { return JSON.parse(req.body); } catch { fail('Invalid JSON.'); }
   }
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
     if (raw.length > 32768) fail('Request payload too large.', 413);
   }
-  try {
-    return JSON.parse(raw || '{}');
-  } catch {
-    fail('Invalid JSON.');
-  }
+  try { return JSON.parse(raw || '{}'); } catch { fail('Invalid JSON.'); }
 }
 
 function sendJson(res, status, data) {
@@ -381,16 +423,11 @@ export async function handleRequest(req, res) {
     }
 
     let apiRoute = pathname;
-    if (apiRoute.startsWith('/api/')) {
-      apiRoute = apiRoute.slice(4);
-    } else if (apiRoute.startsWith('/api')) {
-      apiRoute = apiRoute.slice(4);
-    }
+    if (apiRoute.startsWith('/api/')) apiRoute = apiRoute.slice(4);
+    else if (apiRoute.startsWith('/api')) apiRoute = apiRoute.slice(4);
 
     const validEndpoints = ['/state', '/create', '/join', '/rps', '/start', '/play', '/rematch', '/skip-disconnected', '/chat'];
-    if (!validEndpoints.includes(apiRoute)) {
-      fail(`Endpoint not found: ${pathname}`, 404);
-    }
+    if (!validEndpoints.includes(apiRoute)) fail(`Endpoint not found: ${pathname}`, 404);
 
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '127.0.0.1';
     const now = Date.now();
@@ -399,9 +436,7 @@ export async function handleRequest(req, res) {
       r = { since: now, count: 0 };
       rateLimitMap.set(ip, r);
     }
-    if (++r.count > 1500) {
-      fail('Too many requests. Please slow down.', 429);
-    }
+    if (++r.count > 1500) fail('Too many requests. Please slow down.', 429);
 
     if (req.method === 'GET' && apiRoute === '/state') {
       const roomCode = String(url.searchParams.get('room') || '').trim().toUpperCase();
@@ -417,18 +452,14 @@ export async function handleRequest(req, res) {
       return;
     }
 
-    if (req.method !== 'POST') {
-      fail('Method not allowed.', 405);
-    }
+    if (req.method !== 'POST') fail('Method not allowed.', 405);
 
     const b = await parseBody(req);
 
     if (apiRoute === '/create') {
       if (rooms.size >= MAX_ROOMS) fail('Server room limit reached.', 503);
       let roomCode;
-      do {
-        roomCode = code();
-      } while (rooms.has(roomCode));
+      do { roomCode = code(); } while (rooms.has(roomCode));
 
       const room = {
         code: roomCode,
@@ -448,7 +479,7 @@ export async function handleRequest(req, res) {
 
       const p = addPlayer(room, b.name);
       rooms.set(roomCode, room);
-      note(room, `Table created by ${p.name}. Up to 8 players can join!`);
+      note(room, `Table created by ${p.name} (${room.options.trackLength} Tiles Mode). Up to 8 players!`);
 
       sendJson(res, 201, {
         token: p.id,
@@ -525,6 +556,7 @@ export async function handleRequest(req, res) {
           q.score = 0;
           q.position = 1;
           q.kills = 0;
+          q.missTurns = 0;
         });
         note(room, 'Rematch lobby opened! Choose rock, paper, or scissors for the new round.');
         break;
@@ -556,7 +588,6 @@ export async function handleRequest(req, res) {
   }
 }
 
-// Cleanup idle rooms every 2 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [k, r] of rooms) {
@@ -571,7 +602,7 @@ const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === proces
 if (isDirectRun || process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const server = http.createServer(handleRequest);
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`UNO Counting Cards & Snakes Labyrinth server running at http://localhost:${PORT}`);
+    console.log(`UNO Snakes & Ladders (46/100/200 Tiles) running at http://localhost:${PORT}`);
   });
 }
 
