@@ -2,6 +2,15 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { randomBytes, randomInt } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import {
+  manifestContent,
+  swContent,
+  icon192Buffer,
+  icon512Buffer,
+  iconMaskableBuffer,
+  screenshotDesktopBuffer,
+  screenshotMobileBuffer
+} from './assets.mjs';
 
 // Node 20+. In-memory state with Vercel serverless + Standalone Node support.
 const PORT = Number(process.env.PORT || 3000);
@@ -412,7 +421,7 @@ export async function handleRequest(req, res) {
     let pathname = url.pathname;
 
     if (req.method === 'GET') {
-      if (pathname === '/' || pathname === '/index.html') {
+      if (pathname === '/' || pathname === '/index.html' || pathname === '') {
         try {
           const page = await readFile(new URL('./index.html', import.meta.url));
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
@@ -420,26 +429,62 @@ export async function handleRequest(req, res) {
           return;
         } catch {}
       } else if (pathname === '/manifest.json') {
-        try {
-          const manifest = await readFile(new URL('./manifest.json', import.meta.url));
-          res.writeHead(200, { 'Content-Type': 'application/manifest+json; charset=utf-8' });
-          res.end(manifest);
-          return;
-        } catch {}
+        res.writeHead(200, {
+          'Content-Type': 'application/manifest+json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=3600'
+        });
+        res.end(manifestContent);
+        return;
       } else if (pathname === '/sw.js') {
-        try {
-          const sw = await readFile(new URL('./sw.js', import.meta.url));
-          res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8', 'Service-Worker-Allowed': '/' });
-          res.end(sw);
-          return;
-        } catch {}
-      } else if (pathname.endsWith('.png')) {
-        try {
-          const img = await readFile(new URL('.' + pathname, import.meta.url));
-          res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
-          res.end(img);
-          return;
-        } catch {}
+        res.writeHead(200, {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Service-Worker-Allowed': '/',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(swContent);
+        return;
+      } else if (pathname === '/icon-192.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(icon192Buffer);
+        return;
+      } else if (pathname === '/icon-512.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(icon512Buffer);
+        return;
+      } else if (pathname === '/icon-maskable-512.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(iconMaskableBuffer);
+        return;
+      } else if (pathname === '/screenshot-desktop.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(screenshotDesktopBuffer);
+        return;
+      } else if (pathname === '/screenshot-mobile.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(screenshotMobileBuffer);
+        return;
       }
     }
 
