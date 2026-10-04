@@ -5,9 +5,11 @@ import { fileURLToPath } from 'node:url';
 import {
   manifestContent,
   swContent,
+  icon96Buffer,
   icon192Buffer,
+  iconMaskable192Buffer,
   icon512Buffer,
-  iconMaskableBuffer,
+  iconMaskable512Buffer,
   screenshotDesktopBuffer,
   screenshotMobileBuffer
 } from './assets.mjs';
@@ -445,6 +447,14 @@ export async function handleRequest(req, res) {
         });
         res.end(swContent);
         return;
+      } else if (pathname === '/icon-96.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(icon96Buffer);
+        return;
       } else if (pathname === '/icon-192.png') {
         res.writeHead(200, {
           'Content-Type': 'image/png',
@@ -452,6 +462,14 @@ export async function handleRequest(req, res) {
           'Cache-Control': 'public, max-age=86400'
         });
         res.end(icon192Buffer);
+        return;
+      } else if (pathname === '/icon-maskable-192.png') {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(iconMaskable192Buffer);
         return;
       } else if (pathname === '/icon-512.png') {
         res.writeHead(200, {
@@ -467,7 +485,7 @@ export async function handleRequest(req, res) {
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'public, max-age=86400'
         });
-        res.end(iconMaskableBuffer);
+        res.end(iconMaskable512Buffer);
         return;
       } else if (pathname === '/screenshot-desktop.png') {
         res.writeHead(200, {
