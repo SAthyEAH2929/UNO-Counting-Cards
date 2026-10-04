@@ -2,34 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>UNO Snakes, Ladders & Traps — Android TV & Mobile Multiplayer</title>
-  <meta name="description" content="Multiplayer board race where you draw UNO cards instead of rolling dice! 46, 100, or 200 tiles modes with animated character runners, traps, Ludo knockouts, Android TV remote D-Pad, and live chat.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>UNO Snakes, Ladders & Traps — Multiplayer Board Race (PC, Mobile & Android TV)</title>
+  <meta name="description" content="Commercial-grade multiplayer board race! Draw UNO cards instead of dice, dodge pitfall & freeze traps, knock out opponents, and sprint your 3D runner pawn to victory across 46, 100, or 200 tiles. Full Mobile, CrazyGames PC, and Android TV support.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#070a12">
+  <meta name="theme-color" content="#070a14">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #070a12;
-      --bg-surface: #0e1526;
-      --bg-card: rgba(16, 24, 42, 0.88);
-      --border-color: rgba(255, 255, 255, 0.1);
+      --bg-dark: #060913;
+      --bg-surface: #0c1222;
+      --bg-card: rgba(14, 22, 40, 0.92);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --border-glow: rgba(56, 189, 248, 0.35);
       --accent-green: #10b981;
       --accent-blue: #3b82f6;
       --accent-yellow: #f59e0b;
       --accent-red: #ef4444;
       --accent-purple: #a855f7;
       --accent-cyan: #38bdf8;
+      --accent-pink: #ec4899;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 20px;
+      --radius-full: 9999px;
+      --arcade-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.15);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,9 +41,9 @@
     body {
       background-color: var(--bg-dark);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.14) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.14) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 60%);
+        radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 65%);
       color: var(--text-main);
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       min-height: 100vh;
@@ -47,116 +51,46 @@
       flex-direction: column;
       overflow-x: hidden;
       touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
       scroll-behavior: smooth;
     }
 
     button, input, select { font-family: inherit; }
 
     /* ====================================================
-       ANDROID TV & SMART TV FOCUS STYLES & 10-FOOT UI
+       1. ARCADE & CRAZYGAMES (PC) / TV / MOBILE CONTAINER
        ==================================================== */
-    :focus-visible, .tv-focused {
-      outline: 3.5px solid var(--accent-cyan) !important;
-      outline-offset: 3px !important;
-      box-shadow: 0 0 24px rgba(56, 189, 248, 0.95), inset 0 0 10px rgba(56, 189, 248, 0.4) !important;
-      transform: scale(1.03) !important;
-      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease !important;
-      z-index: 100 !important;
-    }
-
-    /* TV 10-Foot Mode */
-    body.tv-mode {
-      font-size: 1.15rem;
-    }
-
-    body.tv-mode .header-inner,
-    body.tv-mode main {
-      max-width: 96vw;
-    }
-
-    body.tv-mode .btn {
-      padding: 14px 24px;
-      font-size: 1.1rem;
-      border-radius: var(--radius-md);
-      min-height: 52px;
-    }
-
-    body.tv-mode .btn-lg {
-      padding: 16px 28px;
-      font-size: 1.25rem;
-      min-height: 60px;
-    }
-
-    body.tv-mode .drawn-card-stage {
-      width: 145px;
-      height: 210px;
-    }
-
-    body.tv-mode .card-value-display {
-      font-size: 2.8rem;
-    }
-
-    body.tv-mode .map-tile {
-      min-height: 58px;
-    }
-
-    body.tv-mode .runner-man-pawn {
-      transform: translateY(-8px) scale(1.2);
-    }
-
-    /* TV / Gamepad helper bar */
-    .tv-helper-bar {
-      position: sticky;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(8, 13, 24, 0.94);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 8px 16px;
+    .game-viewport-frame {
+      max-width: 1340px;
+      width: 100%;
+      margin: 0 auto;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      z-index: 99;
-      flex-wrap: wrap;
+      flex-direction: column;
+      flex: 1;
+      padding: 0 12px 14px;
     }
 
-    .tv-helper-bar strong {
-      color: #38bdf8;
-    }
-
-    .tv-tag {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #38bdf8;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 0.72rem;
-      letter-spacing: 0.05em;
-    }
-
-    /* Navigation Header */
+    /* Modern Arcade Header Bar */
     header {
-      backdrop-filter: blur(16px);
-      background: rgba(14, 21, 38, 0.92);
-      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: rgba(10, 16, 30, 0.94);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       position: sticky;
       top: 0;
-      z-index: 100;
-      padding: 10px 16px;
+      z-index: 1000;
+      padding: 8px 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .header-inner {
-      max-width: 1300px;
+      max-width: 1340px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .brand-group {
@@ -167,116 +101,217 @@
     }
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6);
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #ef4444 0%, #f59e0b 35%, #10b981 70%, #3b82f6 100%);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Outfit', sans-serif;
       font-weight: 900;
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       color: #fff;
-      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
       transform: rotate(-3deg);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .brand-text-wrap {
+      display: flex;
+      flex-direction: column;
     }
 
     .brand-title {
       font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: 1.15rem;
+      font-weight: 900;
+      font-size: 1.2rem;
       letter-spacing: -0.02em;
-      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      background: linear-gradient(90deg, #ffffff 0%, #38bdf8 50%, #facc15 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
-    .icon-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
+    .arcade-icon-btn {
+      background: rgba(18, 28, 50, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text-muted);
       padding: 6px 12px;
       border-radius: var(--radius-sm);
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.82rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 5px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     }
 
-    .icon-btn:hover, .icon-btn.active {
+    .arcade-icon-btn:hover, .arcade-icon-btn.active {
       color: #fff;
       border-color: var(--accent-cyan);
-      background: rgba(56, 189, 248, 0.15);
+      background: rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+      transform: translateY(-1px);
     }
 
-    /* Main Container */
-    main {
-      max-width: 1300px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 14px;
-      flex: 1;
+    /* ====================================================
+       2. TV MODE & GAMEPAD FOCUS STYLES (10-FOOT UI)
+       ==================================================== */
+    :focus-visible, .tv-focused {
+      outline: 4px solid var(--accent-cyan) !important;
+      outline-offset: 3px !important;
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.95), inset 0 0 12px rgba(56, 189, 248, 0.5) !important;
+      transform: scale(1.03) !important;
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease !important;
+      z-index: 100 !important;
     }
 
+    /* 10-Foot TV Mode Styles */
+    body.tv-mode {
+      font-size: 1.15rem;
+    }
+
+    body.tv-mode .header-inner,
+    body.tv-mode .game-viewport-frame {
+      max-width: 96vw;
+    }
+
+    body.tv-mode .btn {
+      padding: 16px 26px;
+      font-size: 1.18rem;
+      min-height: 56px;
+    }
+
+    body.tv-mode .btn-lg {
+      padding: 18px 32px;
+      font-size: 1.35rem;
+      min-height: 64px;
+    }
+
+    body.tv-mode .drawn-card-stage {
+      width: 155px;
+      height: 225px;
+    }
+
+    body.tv-mode .card-value-display {
+      font-size: 3rem;
+    }
+
+    body.tv-mode .map-tile {
+      min-height: 60px;
+    }
+
+    body.tv-mode .runner-man-pawn {
+      transform: translateY(-10px) scale(1.25);
+    }
+
+    /* TV & Gamepad bottom helper bar */
+    .tv-helper-bar {
+      background: rgba(8, 13, 24, 0.96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      z-index: 900;
+      flex-wrap: wrap;
+    }
+
+    .tv-helper-bar strong {
+      color: #38bdf8;
+    }
+
+    .tv-tag {
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #38bdf8;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ====================================================
+       3. PANELS & CARDS (GLASSMORPHISM CHASSIS)
+       ==================================================== */
     .panel {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6);
+      margin-top: 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--arcade-shadow);
+      position: relative;
     }
 
-    /* Hero */
+    /* Hero / Arcade Showcase */
     .hero {
       text-align: center;
-      padding: 16px 8px 22px;
+      padding: 16px 8px 20px;
     }
 
     .hero-tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(59, 130, 246, 0.12);
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
       color: #60a5fa;
-      padding: 4px 12px;
+      padding: 5px 14px;
       border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 0.8rem;
+      font-weight: 700;
       margin-bottom: 10px;
+      letter-spacing: 0.03em;
     }
 
     .hero h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-size: clamp(1.8rem, 4.5vw, 2.9rem);
       font-weight: 900;
       line-height: 1.15;
       margin-bottom: 10px;
+      letter-spacing: -0.02em;
     }
 
     .hero h1 .highlight {
-      background: linear-gradient(135deg, #facc15, #f43f5e, #38bdf8);
+      background: linear-gradient(135deg, #facc15 0%, #f43f5e 50%, #38bdf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(244, 63, 94, 0.3);
     }
 
     .hero p {
       color: var(--text-muted);
       font-size: 0.95rem;
-      max-width: 640px;
-      margin: 0 auto 14px;
+      max-width: 660px;
+      margin: 0 auto 12px;
       line-height: 1.45;
     }
 
@@ -286,28 +321,30 @@
     label {
       display: block;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text-muted);
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
     }
 
     input, select {
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
       background: #080c16;
       color: #fff;
-      font-size: 0.92rem;
+      font-size: 0.96rem;
+      font-weight: 600;
       outline: none;
       transition: all 0.2s ease;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
     }
 
     input:focus, select:focus {
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.6);
     }
 
     .grid-2 {
@@ -317,29 +354,37 @@
     }
 
     .grid-section {
-      background: rgba(8, 12, 22, 0.6);
+      background: rgba(8, 12, 24, 0.75);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-md);
-      padding: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      gap: 12px;
     }
 
-    /* Buttons */
+    /* Buttons with 3D arcade press-down */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       cursor: pointer;
       border: 1px solid transparent;
-      border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      transition: all 0.2s ease;
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
     }
 
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -347,21 +392,23 @@
     .btn-primary {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
     }
     .btn-primary:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
 
     .btn-secondary {
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       color: #fff;
     }
-    .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.15); }
+    .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
 
     .btn-accent {
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #fff;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
     }
     .btn-accent:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
 
@@ -372,7 +419,7 @@
     }
     .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.25); }
 
-    .btn-lg { padding: 13px 22px; font-size: 1.05rem; border-radius: var(--radius-md); }
+    .btn-lg { padding: 15px 24px; font-size: 1.1rem; }
     .btn-block { width: 100%; }
 
     /* In-Game Room Header */
@@ -391,18 +438,48 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 1.35rem;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       color: #34d399;
-      background: #080d18;
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 3px 10px;
+      background: #070c17;
+      border: 1.5px solid rgba(16, 185, 129, 0.4);
+      padding: 4px 12px;
       border-radius: var(--radius-sm);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
     }
 
-    /* 8-Player Roster */
+    /* Live Game Status Ticker (CrazyGames style) */
+    .live-game-ticker {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(56, 189, 248, 0.15), rgba(168, 85, 247, 0.12));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ticker-turn-badge {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ticker-action-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* 8-Player Roster Leaderboard */
     .players-roster {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
       gap: 8px;
       margin-bottom: 14px;
     }
@@ -416,12 +493,14 @@
       flex-direction: column;
       gap: 4px;
       position: relative;
+      transition: all 0.2s ease;
     }
 
     .player-card.active-turn {
-      border-color: #34d399;
-      background: rgba(16, 185, 129, 0.08);
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
     }
 
     .pcolor-0 { color: #facc15; }
@@ -434,18 +513,18 @@
     .pcolor-7 { color: #a3e635; }
 
     /* ====================================================
-       THE DYNAMIC BOARD MAP (46, 100, or 200 Tiles)
+       4. THE DYNAMIC BOARD MAP (46, 100, or 200 Tiles)
        ==================================================== */
     .track-map-wrapper {
-      background: #060912;
-      border: 2px solid rgba(255, 255, 255, 0.12);
+      background: #050811;
+      border: 2px solid rgba(255, 255, 255, 0.14);
       border-radius: var(--radius-lg);
-      padding: 12px;
+      padding: 14px;
       margin-bottom: 16px;
       position: relative;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
       scroll-behavior: smooth;
     }
 
@@ -461,8 +540,8 @@
     .track-legend {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.72rem;
+      gap: 10px;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--text-muted);
       flex-wrap: wrap;
@@ -470,40 +549,39 @@
 
     .dynamic-track-grid {
       display: grid;
-      gap: 5px;
-      padding: 8px;
+      gap: 6px;
+      padding: 10px;
       background: rgba(255, 255, 255, 0.02);
       border-radius: var(--radius-md);
       position: relative;
     }
 
-    /* Grid sizes for 46, 100, 200 tiles */
     .grid-mode-46 {
       grid-template-columns: repeat(12, 1fr);
-      min-width: 720px;
+      min-width: 740px;
     }
 
     .grid-mode-100 {
       grid-template-columns: repeat(10, 1fr);
-      min-width: 650px;
+      min-width: 680px;
     }
 
     .grid-mode-200 {
       grid-template-columns: repeat(15, 1fr);
-      min-width: 900px;
+      min-width: 950px;
     }
 
     .map-tile {
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
       border-radius: 8px;
-      min-height: 48px;
+      min-height: 52px;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 3px 2px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      padding: 4px 2px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
       user-select: none;
       transition: all 0.2s ease;
     }
@@ -520,41 +598,44 @@
       background: linear-gradient(135deg, #10b981, #047857) !important;
       border: 2px solid #34d399;
       color: #fff !important;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
     }
 
     .map-tile.tile-finish {
       background: linear-gradient(135deg, #f59e0b, #b45309) !important;
       border: 2px solid #fbbf24;
       color: #fff !important;
-      animation: finish-pulse 2s infinite alternate;
+      animation: finish-pulse 1.8s infinite alternate;
     }
 
     .map-tile.tile-trap-pitfall {
       background: linear-gradient(135deg, #450a0a, #7f1d1d) !important;
       border: 2px solid #ef4444;
       color: #fecaca !important;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
     }
 
     .map-tile.tile-trap-freeze {
       background: linear-gradient(135deg, #0c4a6e, #0369a1) !important;
       border: 2px solid #38bdf8;
       color: #bae6fd !important;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
     }
 
     @keyframes finish-pulse {
-      from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
-      to { box-shadow: 0 0 28px rgba(245, 158, 11, 0.8); }
+      from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); transform: scale(1); }
+      to { box-shadow: 0 0 30px rgba(245, 158, 11, 0.9); transform: scale(1.03); }
     }
 
     .tile-num-text {
       font-family: 'Outfit', sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 900;
       line-height: 1;
     }
 
     .tile-feature-badge {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       line-height: 1;
     }
 
@@ -568,7 +649,7 @@
     }
 
     /* ====================================================
-       ANIMATED 3D CHARACTER "MAN" RUNNER PAWNS
+       5. 3D ANIMATED CHARACTER "MAN" RUNNER PAWNS
        ==================================================== */
     .runner-man-pawn {
       display: flex;
@@ -582,27 +663,27 @@
     }
 
     .man-head {
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: currentColor;
       border: 1.5px solid #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.55rem;
+      font-size: 0.58rem;
       font-weight: 900;
       color: #000;
       line-height: 1;
     }
 
     .man-body {
-      width: 8px;
-      height: 9px;
+      width: 9px;
+      height: 10px;
       background: currentColor;
       border-radius: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       margin-top: -1px;
     }
 
@@ -621,22 +702,49 @@
 
     /* Running animation */
     .runner-man-pawn.man-running {
-      animation: runner-bounce 0.22s infinite alternate;
-      transform: translateY(-16px) scale(1.35) !important;
+      animation: runner-bounce 0.2s infinite alternate;
+      transform: translateY(-16px) scale(1.4) !important;
       z-index: 30 !important;
-      filter: drop-shadow(0 0 10px #ffffff) brightness(1.3);
+      filter: drop-shadow(0 0 12px #ffffff) brightness(1.35);
     }
 
-    .runner-man-pawn.man-running .man-leg:nth-child(1) { transform: rotate(25deg); }
-    .runner-man-pawn.man-running .man-leg:nth-child(2) { transform: rotate(-25deg); }
+    .runner-man-pawn.man-running .man-leg:nth-child(1) { transform: rotate(28deg); }
+    .runner-man-pawn.man-running .man-leg:nth-child(2) { transform: rotate(-28deg); }
 
     @keyframes runner-bounce {
-      from { transform: translateY(-14px) scale(1.3); }
-      to { transform: translateY(-22px) scale(1.4); }
+      from { transform: translateY(-14px) scale(1.35); }
+      to { transform: translateY(-22px) scale(1.45); }
+    }
+
+    /* Floating Popup FX (CrazyGames Style) */
+    .floating-action-popup {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1.5px solid #facc15;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 0 15px rgba(250, 204, 21, 0.8);
+      animation: float-up-fade 1.4s forwards cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 50;
+    }
+
+    @keyframes float-up-fade {
+      0% { opacity: 0; transform: translate(-50%, 10px) scale(0.6); }
+      20% { opacity: 1; transform: translate(-50%, -10px) scale(1.15); }
+      80% { opacity: 1; transform: translate(-50%, -24px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -36px) scale(0.9); }
     }
 
     /* ====================================================
-       HUD: DRAW CARD & IN-GAME CHAT
+       6. HUD: 3D DRAW CARD & IN-GAME CHAT
        ==================================================== */
     .gameplay-hud {
       display: grid;
@@ -647,43 +755,45 @@
 
     .draw-card-box {
       background: #080d18;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-md);
-      padding: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
     .drawn-card-stage {
-      width: 120px;
-      height: 175px;
+      width: 125px;
+      height: 180px;
       border-radius: var(--radius-md);
       margin: 12px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      border: 3.5px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      border: 3.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
       user-select: none;
       transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      perspective: 800px;
     }
 
-    .card-bg-red { background: linear-gradient(135deg, #ef4444, #991b1b); }
-    .card-bg-blue { background: linear-gradient(135deg, #3b82f6, #1e40af); }
-    .card-bg-green { background: linear-gradient(135deg, #10b981, #065f46); }
-    .card-bg-yellow { background: linear-gradient(135deg, #f59e0b, #b45309); }
-    .card-bg-wild { background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6); }
+    .card-bg-red { background: linear-gradient(135deg, #ef4444, #991b1b); box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); }
+    .card-bg-blue { background: linear-gradient(135deg, #3b82f6, #1e40af); box-shadow: 0 0 25px rgba(59, 130, 246, 0.4); }
+    .card-bg-green { background: linear-gradient(135deg, #10b981, #065f46); box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
+    .card-bg-yellow { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 25px rgba(245, 158, 11, 0.4); }
+    .card-bg-wild { background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6); box-shadow: 0 0 30px rgba(250, 204, 21, 0.5); }
     .card-bg-back { background: linear-gradient(135deg, #1e293b, #0f172a); border-color: rgba(255, 255, 255, 0.3); }
 
     .card-oval {
       position: absolute;
       inset: 14% 10%;
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.22);
+      border: 2px solid rgba(255, 255, 255, 0.85);
       border-radius: 50%;
       transform: rotate(24deg);
     }
@@ -691,21 +801,22 @@
     .card-value-display {
       font-family: 'Outfit', sans-serif;
       font-weight: 900;
-      font-size: 2.3rem;
+      font-size: 2.4rem;
       color: #fff;
-      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.8);
       position: relative;
       z-index: 2;
     }
 
+    /* Chat & Leaderboard Panel */
     .chat-panel {
       background: #080d18;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-md);
       padding: 14px;
       display: flex;
       flex-direction: column;
-      height: 350px;
+      height: 360px;
     }
 
     .chat-stream {
@@ -718,41 +829,46 @@
     }
 
     .chat-msg {
-      background: rgba(255, 255, 255, 0.03);
-      padding: 5px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px 9px;
       border-radius: var(--radius-sm);
-      font-size: 0.82rem;
+      font-size: 0.84rem;
+      border-left: 2.5px solid #38bdf8;
     }
 
     .quick-emojis {
       display: flex;
-      gap: 4px;
-      margin-bottom: 6px;
+      gap: 5px;
+      margin-bottom: 8px;
       overflow-x: auto;
+      padding-bottom: 2px;
     }
 
     .emoji-pill {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       color: #fff;
       font-size: 0.95rem;
       padding: 4px 8px;
       border-radius: 6px;
       cursor: pointer;
+      transition: transform 0.15s ease;
     }
+    .emoji-pill:hover { transform: scale(1.15); background: rgba(56, 189, 248, 0.2); }
 
     .winner-banner {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(239, 68, 68, 0.25));
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(239, 68, 68, 0.3));
       border: 2px solid #fbbf24;
       border-radius: var(--radius-md);
-      padding: 18px;
+      padding: 20px;
       text-align: center;
       margin-bottom: 16px;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
     }
 
     .toast-container {
       position: fixed;
-      bottom: 60px;
+      bottom: 65px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9999;
@@ -760,15 +876,15 @@
     }
 
     .toast {
-      background: rgba(15, 23, 42, 0.96);
+      background: rgba(12, 18, 34, 0.98);
       border: 1.5px solid var(--accent-cyan);
       color: #fff;
-      padding: 10px 20px;
+      padding: 10px 22px;
       border-radius: 999px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.5);
-      animation: toast-in 0.25s ease-out;
+      font-size: 0.94rem;
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.6);
+      animation: toast-in 0.22s ease-out;
     }
 
     @keyframes toast-in {
@@ -776,14 +892,70 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
+    /* Modal dialogs (Controls / Rules) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 2000;
+    }
+
+    .modal-card {
+      background: #0b1120;
+      border: 1.5px solid rgba(56, 189, 248, 0.4);
+      border-radius: var(--radius-lg);
+      max-width: 580px;
+      width: 100%;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(56, 189, 248, 0.3);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
     .hidden { display: none !important; }
 
-    #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999; }
+    #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1999; }
 
+    /* ====================================================
+       7. MOBILE RESPONSIVE TWEAKS (THUMB DOCK)
+       ==================================================== */
     @media (max-width: 860px) {
       .gameplay-hud { grid-template-columns: 1fr; }
       .grid-2 { grid-template-columns: 1fr; }
       .chat-panel { height: 260px; }
+      
+      .brand-title { font-size: 1.05rem; }
+      .hero h1 { font-size: 1.7rem; }
+
+      /* Sticky Mobile Action Drawer */
+      .mobile-turn-dock {
+        position: fixed;
+        bottom: 48px;
+        left: 0;
+        right: 0;
+        background: rgba(8, 13, 24, 0.95);
+        backdrop-filter: blur(14px);
+        padding: 10px 16px;
+        border-top: 1.5px solid var(--accent-cyan);
+        z-index: 850;
+        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.7);
+        display: flex;
+        gap: 10px;
+      }
     }
   </style>
 </head>
@@ -791,44 +963,54 @@
 
   <canvas id="confettiCanvas" class="hidden"></canvas>
 
+  <!-- ARCADE HEADER BAR -->
   <header>
     <div class="header-inner">
       <div class="brand-group">
         <div class="brand-logo">U</div>
-        <div><span class="brand-title">UNO Board Race</span></div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">UNO BOARD SHOWDOWN</span>
+          <span class="brand-subtitle">Snakes, Ladders & Traps Race</span>
+        </div>
       </div>
       <div class="header-actions">
-        <button id="tvModeToggle" class="icon-btn" title="Toggle Android TV 10-Foot Mode / Fullscreen"><span>📺</span> <span id="tvModeText">TV Mode</span></button>
-        <button id="soundToggle" class="icon-btn" title="Audio"><span id="soundIcon">🔊</span></button>
-        <button id="howToPlayBtn" class="icon-btn"><span>📖</span> Rules</button>
+        <button id="tvModeToggle" class="arcade-icon-btn" title="Toggle 10-Foot Android TV Mode"><span>📺</span> <span id="tvModeText">TV Mode</span></button>
+        <button id="controlsModalBtn" class="arcade-icon-btn" title="Gamepad & Remote Controls"><span>🎮</span> Controls</button>
+        <button id="soundToggle" class="arcade-icon-btn" title="Sound Effects"><span id="soundIcon">🔊</span></button>
+        <button id="howToPlayBtn" class="arcade-icon-btn" title="Game Rules"><span>📖</span> Rules</button>
+        <button id="fullscreenToggleBtn" class="arcade-icon-btn" title="Fullscreen"><span>⛶</span></button>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- LOBBY -->
+  <main class="game-viewport-frame">
+    <!-- LOBBY / SETUP -->
     <section id="entrySection">
       <div class="hero">
-        <div class="hero-tag">📺 Android TV & Mobile Ready · 46 / 100 / 200 Tiles Modes</div>
+        <div class="hero-tag">🔥 46 / 100 / 200 Tiles · Up to 8 Players · Android TV & Mobile</div>
         <h1>Draw UNO Cards.<br><span class="highlight">Dodge Traps & Knockout Foes!</span></h1>
-        <p>Choose your track length (46, 100, or 200 tiles), watch your 3D character runner sprint along the board, dodge pitfall & freeze traps, and climb ladders to FINISH!</p>
+        <p>Pick your board mode, sprint your animated runner pawn across the winding track, climb ladders to overtake rivals, and avoid hazardous pitfalls on your way to FINISH!</p>
       </div>
 
       <div class="panel">
         <div class="form-group">
-          <label for="nameInput">Player Display Name</label>
-          <input id="nameInput" maxlength="24" placeholder="Enter your name (e.g. Sathya)" autocomplete="nickname">
+          <label for="nameInput">Runner Display Name</label>
+          <input id="nameInput" maxlength="24" placeholder="Enter your player name (e.g. Sathya)" autocomplete="nickname">
         </div>
 
         <div class="grid-2">
+          <!-- Host Card -->
           <div class="grid-section">
             <div>
-              <h3>👑 Host Table (Up to 8 Players)</h3>
-              <div class="form-group" style="margin-top: 10px;">
-                <label for="trackLengthSelect">Game Mode / Track Length</label>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h3 style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:800; color:#34d399;">👑 Host New Table</h3>
+                <span class="tv-tag">Up to 8 Players</span>
+              </div>
+              <div class="form-group" style="margin-top: 12px;">
+                <label for="trackLengthSelect">Select Track Mode</label>
                 <select id="trackLengthSelect">
                   <option value="46" selected>46 Tiles · Quick Match (Snakes & Ladders Loop)</option>
-                  <option value="100">100 Tiles · Classic Championship (10x10 Track)</option>
+                  <option value="100">100 Tiles · Classic Championship (10x10 Board)</option>
                   <option value="200">200 Tiles · Epic Grand Marathon</option>
                 </select>
               </div>
@@ -838,12 +1020,13 @@
             </button>
           </div>
 
+          <!-- Join Card -->
           <div class="grid-section">
             <div>
-              <h3>🎮 Join Friends' Match</h3>
-              <div class="form-group" style="margin-top: 10px;">
+              <h3 style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:800; color:#60a5fa;">🎮 Join Friends' Match</h3>
+              <div class="form-group" style="margin-top: 12px;">
                 <label for="joinCodeInput">8-Character Table Code</label>
-                <input id="joinCodeInput" maxlength="8" placeholder="e.g. 962908F3" autocapitalize="characters" spellcheck="false" style="font-family:'JetBrains Mono',monospace; font-size:1.15rem; letter-spacing:0.1em; text-transform:uppercase;">
+                <input id="joinCodeInput" maxlength="8" placeholder="e.g. 962908F3" autocapitalize="characters" spellcheck="false" style="font-family:'JetBrains Mono',monospace; font-size:1.2rem; letter-spacing:0.12em; text-transform:uppercase;">
               </div>
             </div>
             <button id="joinRoomBtn" class="btn btn-accent btn-block btn-lg">
@@ -854,15 +1037,15 @@
       </div>
     </section>
 
-    <!-- IN-GAME -->
+    <!-- IN-GAME BOARD ARENA -->
     <section id="gameSection" class="hidden">
       <div class="panel">
         <div class="room-header">
           <div>
-            <div style="font-size:0.68rem; font-weight:700; color:var(--text-dim); text-transform:uppercase;">Table Code</div>
+            <div style="font-size:0.68rem; font-weight:800; color:var(--text-dim); text-transform:uppercase;">Active Match Code</div>
             <div style="display:flex; align-items:center; gap:8px;">
               <span id="roomCodeDisplay" class="room-code-tag">--------</span>
-              <span id="connectionText" style="font-size:0.8rem; color:#34d399; font-weight:600;">Live</span>
+              <span id="connectionText" style="font-size:0.82rem; color:#34d399; font-weight:700;">Live Sync</span>
             </div>
           </div>
           <div class="header-actions">
@@ -871,39 +1054,48 @@
           </div>
         </div>
 
-        <!-- 8-Player Roster -->
+        <!-- Live Ticker Banner -->
+        <div class="live-game-ticker" id="liveGameTicker">
+          <div class="ticker-turn-badge" id="tickerTurnBadge">
+            <span>🔥</span> <span id="turnBannerTitle">Player's Turn</span>
+          </div>
+          <div class="ticker-action-desc" id="effectBannerDesc">Draw an UNO card to move your runner!</div>
+        </div>
+
+        <!-- 8-Player Roster Leaderboard -->
         <div id="playersRoster" class="players-roster"></div>
 
-        <!-- RPS LOBBY -->
+        <!-- RPS OPENING LOBBY -->
         <div id="lobbyView" class="hidden">
-          <div style="text-align:center; padding:18px; background:rgba(8,12,22,0.6); border-radius:var(--radius-md);">
-            <h3>✌️ Choose Opening RPS Gesture</h3>
-            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">RPS winner takes the first turn!</p>
-            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:14px;">
-              <button class="btn btn-secondary rps-btn" data-rps="rock">🪨 Rock</button>
-              <button class="btn btn-secondary rps-btn" data-rps="paper">📄 Paper</button>
-              <button class="btn btn-secondary rps-btn" data-rps="scissors">✂️ Scissors</button>
+          <div style="text-align:center; padding:22px; background:rgba(8,12,24,0.8); border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.08);">
+            <h3 style="font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:900;">✌️ Choose Opening Gesture</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:14px;">Winner of Rock-Paper-Scissors takes the first card draw turn!</p>
+            <div style="display:flex; justify-content:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
+              <button class="btn btn-secondary rps-btn" data-rps="rock" style="min-width:110px;">🪨 Rock</button>
+              <button class="btn btn-secondary rps-btn" data-rps="paper" style="min-width:110px;">📄 Paper</button>
+              <button class="btn btn-secondary rps-btn" data-rps="scissors" style="min-width:110px;">✂️ Scissors</button>
             </div>
-            <p id="rpsStatusText" style="color:#34d399; font-weight:600; min-height:20px; font-size:0.9rem;"></p>
-            <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
+            <p id="rpsStatusText" style="color:#34d399; font-weight:700; min-height:22px; font-size:0.95rem;"></p>
+            <div style="display:flex; justify-content:center; gap:12px; margin-top:16px;">
               <button id="startGameBtn" class="btn btn-primary btn-lg"><span>⚔️</span> Start Match</button>
               <button id="practiceGameBtn" class="btn btn-secondary btn-lg"><span>🤖</span> Solo Practice</button>
             </div>
           </div>
         </div>
 
-        <!-- PLAY AREA -->
+        <!-- PLAY ARENA -->
         <div id="playAreaView" class="hidden">
+          <!-- Winner Banner -->
           <div id="winnerBanner" class="winner-banner hidden">
-            <div style="font-family:'Outfit',sans-serif; font-size:1.8rem; font-weight:900; color:#fde68a;" id="winnerText">🏆 Winner!</div>
-            <p id="winnerSubtitle" style="color:#fef08a; font-size:1rem; margin-bottom:12px;"></p>
+            <div style="font-family:'Outfit',sans-serif; font-size:2rem; font-weight:900; color:#fde68a;" id="winnerText">🏆 Winner!</div>
+            <p id="winnerSubtitle" style="color:#fef08a; font-size:1.05rem; margin-bottom:14px;"></p>
             <button id="rematchBtn" class="btn btn-primary btn-lg"><span>🔄</span> Play Rematch</button>
           </div>
 
           <!-- DYNAMIC TRACK MAP -->
           <div class="track-map-wrapper" id="trackMapWrapper">
             <div class="track-map-header">
-              <h3 id="mapTrackTitle" style="font-size:1.1rem;"><span>🗺️</span> Winding Board Race Track</h3>
+              <h3 id="mapTrackTitle" style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:800;"><span>🗺️</span> Winding Board Race Track</h3>
               <div class="track-legend">
                 <span>🚩 START (#1)</span>
                 <span>🪜 Ladder</span>
@@ -915,12 +1107,11 @@
             <div id="dynamicTrackGridDOM" class="dynamic-track-grid" aria-label="Board track"></div>
           </div>
 
-          <!-- HUD: DRAW CARD & CHAT -->
+          <!-- HUD: DRAW CARD STAGE & LIVE CHAT -->
           <div class="gameplay-hud">
-            <!-- Draw Card Stage -->
+            <!-- Draw Card Box -->
             <div class="draw-card-box">
-              <div id="turnBannerTitle" style="font-family:'Outfit',sans-serif; font-size:1.25rem; font-weight:800;">Player's Turn</div>
-              <div id="effectBannerDesc" style="color:var(--text-muted); font-size:0.85rem; margin-top:3px;">Draw an UNO card to move your runner!</div>
+              <div style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:800;" id="hudCardTitle">UNO Card Deck</div>
 
               <div id="drawnCardBox" class="drawn-card-stage card-bg-back">
                 <div class="card-oval"></div>
@@ -932,10 +1123,11 @@
               </button>
             </div>
 
-            <!-- Chat Box -->
+            <!-- Live Chat Panel -->
             <div class="chat-panel">
-              <div style="font-family:'Outfit',sans-serif; font-size:1rem; font-weight:800; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
-                💬 Table Live Chat
+              <div style="font-family:'Outfit',sans-serif; font-size:1rem; font-weight:800; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                <span>💬 Table Live Chat</span>
+                <span style="font-size:0.75rem; color:var(--text-dim);">Live</span>
               </div>
               <div id="chatStream" class="chat-stream"></div>
               <div class="quick-emojis">
@@ -946,34 +1138,67 @@
                 <button class="emoji-pill" data-msg="🏆 GG!">🏆</button>
               </div>
               <form id="chatForm" style="display:flex; gap:6px;">
-                <input id="chatInput" maxlength="120" placeholder="Type message..." autocomplete="off" style="flex:1; padding:6px 10px; font-size:0.85rem;">
-                <button type="submit" class="btn btn-accent" style="padding:6px 12px;">Send</button>
+                <input id="chatInput" maxlength="120" placeholder="Type message..." autocomplete="off" style="flex:1; padding:8px 12px; font-size:0.88rem;">
+                <button type="submit" class="btn btn-accent" style="padding:8px 14px;">Send</button>
               </form>
             </div>
           </div>
         </div>
       </div>
     </section>
-
-    <details class="panel" style="padding:14px 18px;">
-      <summary style="cursor:pointer; font-weight:700;"><span>📖</span> Game Rules: 46/100/200 Modes, Traps & Ludo Knockouts</summary>
-      <div style="margin-top:10px; font-size:0.86rem; line-height:1.55; color:#cbd5e1;">
-        <p>1. <strong>UNO Draw</strong>: Draw 1 card on your turn. Advance your runner forward by the card value (0 = 10 steps, +2 = 2 steps, +4 Wild = 4 steps).</p>
-        <p>2. <strong>🕳️ Pitfall Trap</strong>: Stepping into a pitfall sends your runner <strong>all the way back to START (Tile 1)</strong>!</p>
-        <p>3. <strong>🪤 Freeze Trap</strong>: Stepping into a freeze trap makes you <strong>miss your next card draw turn</strong>!</p>
-        <p>4. <strong>💥 Ludo Knockout</strong>: Landing on another player's tile eliminates them back to START!</p>
-        <p>5. <strong>🪜 Ladders</strong>: Climb up shortcut ladders to get ahead!</p>
-        <p>6. <strong>📺 Android TV & Gamepad</strong>: Use D-Pad [▲ ▼ ◄ ►] + [OK] on your remote or Bluetooth Gamepad (A) to play effortlessly from the couch!</p>
-      </div>
-    </details>
   </main>
 
-  <!-- TV & Controller Helper Bar -->
+  <!-- CONTROLS GUIDE MODAL -->
+  <div id="controlsModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:900;">🎮 Game Controls Guide</h3>
+        <button id="closeControlsBtn" class="arcade-icon-btn" style="padding:4px 8px;">✕</button>
+      </div>
+      <div style="font-size:0.92rem; line-height:1.6; color:#cbd5e1;">
+        <h4 style="color:#38bdf8; margin:8px 0 4px;">📺 Android TV Remote:</h4>
+        <p>• <strong>D-Pad [▲ ▼ ◄ ►]</strong>: Move highlight across buttons and options</p>
+        <p>• <strong>[OK] / [Enter]</strong>: Select / Draw UNO card on your turn</p>
+        <p>• <strong>[Back] / [Escape]</strong>: Cancel / Leave Room</p>
+
+        <h4 style="color:#34d399; margin:12px 0 4px;">🎮 Bluetooth / Wireless Gamepad:</h4>
+        <p>• <strong>(A) / Cross</strong>: Draw UNO Card & Run / Select</p>
+        <p>• <strong>(B) / Circle</strong>: Back / Cancel</p>
+        <p>• <strong>(Y) / Triangle</strong>: Toggle 10-Foot TV Mode</p>
+        <p>• <strong>(Start / Select)</strong>: Mute / Unmute Audio</p>
+
+        <h4 style="color:#facc15; margin:12px 0 4px;">💻 PC / CrazyGames Keyboard:</h4>
+        <p>• <strong>Space / Enter</strong>: Quick Draw Card on active turn</p>
+        <p>• <strong>Arrow Keys</strong>: Spatial menu navigation</p>
+        <p>• <strong>F / F11</strong>: Fullscreen mode</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES MODAL -->
+  <div id="rulesModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:900;">📖 UNO Board Race Rules</h3>
+        <button id="closeRulesBtn" class="arcade-icon-btn" style="padding:4px 8px;">✕</button>
+      </div>
+      <div style="font-size:0.92rem; line-height:1.65; color:#cbd5e1;">
+        <p>1. <strong>🎴 UNO Card Draw</strong>: Draw 1 card on your turn. Move forward by its value (0 = 10 steps, +2 = 2 steps, +4 Wild = 4 steps).</p>
+        <p>2. <strong>🕳️ Pitfall Trap</strong>: Falling in a pitfall sends your runner <strong>back to START (Tile #1)</strong>!</p>
+        <p>3. <strong>🪤 Freeze Trap</strong>: Stepping on freeze makes you <strong>miss your next card draw turn</strong>!</p>
+        <p>4. <strong>💥 Ludo Knockout</strong>: Landing on an opponent's tile knocks them out and sends them back to START!</p>
+        <p>5. <strong>🪜 Shortcut Ladders</strong>: Climb ladders to skip ahead of rivals.</p>
+        <p>6. <strong>🏆 Victory</strong>: First player to reach the final FINISH tile wins the race!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ON-SCREEN TV & GAMEPAD HELPER BAR -->
   <footer class="tv-helper-bar" id="tvHelperBar">
     <span class="tv-tag">📺 TV / GAMEPAD</span>
     <span>D-Pad <strong>[▲ ▼ ◄ ►]</strong> Navigate</span>
     <span>•</span>
-    <span>Remote <strong>[OK]</strong> or Gamepad <strong>(A)</strong> Select / Draw Card</span>
+    <span>Remote <strong>[OK]</strong> or Gamepad <strong>(A)</strong> Draw Card</span>
     <span>•</span>
     <span><strong>[TV Mode]</strong> 10-Foot View</span>
   </footer>
@@ -1059,7 +1284,7 @@
     }
 
     // ==========================================
-    // 2. SOUND SYSTEM
+    // 2. SOUND SYSTEM (WEB AUDIO SYNTHESIZER)
     // ==========================================
     class SoundFX {
       constructor() {
@@ -1189,7 +1414,7 @@
     const confetti = new Confetti('confettiCanvas');
 
     // ==========================================
-    // 4. STATE & NETWORKING
+    // 4. STATE & API ENGINE
     // ==========================================
     const $ = id => document.getElementById(id);
     let auth = null;
@@ -1213,7 +1438,17 @@
       el.textContent = message;
       el.classList.remove('hidden');
       clearTimeout(toast.timer);
-      toast.timer = setTimeout(() => el.classList.add('hidden'), 4500);
+      toast.timer = setTimeout(() => el.classList.add('hidden'), 4200);
+    }
+
+    function showFloatingPopup(tileId, text) {
+      const tile = document.getElementById('track-tile-' + tileId);
+      if (!tile) return;
+      const popup = document.createElement('div');
+      popup.className = 'floating-action-popup';
+      popup.textContent = text;
+      tile.appendChild(popup);
+      setTimeout(() => popup.remove(), 1500);
     }
 
     async function apiRequest(endpoint, data = null) {
@@ -1226,12 +1461,12 @@
 
       let res;
       try { res = await fetch(url, options); } catch {
-        throw new Error('Connection error.');
+        throw new Error('Connection error. Check internet.');
       }
       const raw = await res.text();
       let json;
       try { json = JSON.parse(raw); } catch {
-        throw new Error('Backend returned invalid response.');
+        throw new Error('Server returned invalid response.');
       }
       if (!res.ok) throw new Error(json.error || 'Request failed.');
       return json;
@@ -1275,7 +1510,7 @@
       }
     }
 
-    // Smooth Auto Camera Tracker for Android TV / Displays
+    // Auto-center camera tracker on track map
     function autoCenterTileOnScreen(tileId) {
       const tileEl = document.getElementById('track-tile-' + tileId);
       const wrapper = $('trackMapWrapper');
@@ -1288,7 +1523,7 @@
       }
     }
 
-    // Step-by-Step 3D Character "Man" Runner Animation
+    // Animated 3D Runner Movement
     async function triggerTurnAnimation(move) {
       isAnimating = true;
       renderUI();
@@ -1318,15 +1553,22 @@
           await new Promise(r => setTimeout(r, 130));
         }
 
-        if (move.effect.includes('TRAP')) {
+        if (move.effect.includes('TRAP (Pitfall)')) {
           sound.playTrap();
+          showFloatingPopup(1, '🕳️ PITFALL! Reset to 1');
+          toast(move.effect);
+        } else if (move.effect.includes('TRAP (Freeze)')) {
+          sound.playTrap();
+          showFloatingPopup(target, '❄️ FROZEN! Miss 1 Turn');
           toast(move.effect);
         } else if (move.effect.includes('LADDER')) {
           sound.playLadder();
+          showFloatingPopup(target, '🪜 LADDER CLIMB!');
         }
 
         if (move.knockouts && move.knockouts.length > 0) {
           sound.playKnockout();
+          showFloatingPopup(1, `💥 KNOCKOUT: ${move.knockouts[0].victimName}`);
           toast(`💥 KNOCKOUT! ${move.knockouts[0].killerName} sent ${move.knockouts[0].victimName} back to START!`);
         }
 
@@ -1425,7 +1667,7 @@
 
       $('roomCodeDisplay').textContent = s.code;
 
-      // 8-Player Roster
+      // 8-Player Leaderboard Roster
       const roster = $('playersRoster');
       roster.replaceChildren();
 
@@ -1440,12 +1682,12 @@
         row1.style.justifyContent = 'space-between';
 
         const name = document.createElement('strong');
-        name.style.fontSize = '0.85rem';
+        name.style.fontSize = '0.88rem';
         name.className = `pcolor-${index % 8}`;
         name.textContent = p.name;
 
         const posBadge = document.createElement('span');
-        posBadge.style.fontSize = '0.75rem';
+        posBadge.style.fontSize = '0.76rem';
         posBadge.style.fontFamily = 'JetBrains Mono';
         posBadge.style.color = '#38bdf8';
         posBadge.textContent = `#${p.position || 1}/${totalTiles}`;
@@ -1456,7 +1698,7 @@
         row2.style.display = 'flex';
         row2.style.alignItems = 'center';
         row2.style.justifyContent = 'space-between';
-        row2.style.fontSize = '0.72rem';
+        row2.style.fontSize = '0.74rem';
 
         const scoreText = document.createElement('span');
         scoreText.textContent = `${p.score} PTS`;
@@ -1558,7 +1800,7 @@
     }
 
     // ==========================================
-    // 6. ANDROID TV & GAMEPAD NAVIGATION ENGINE
+    // 6. ANDROID TV, GAMEPAD & KEYBOARD NAVIGATION
     // ==========================================
     let isTVMode = false;
 
@@ -1587,7 +1829,7 @@
 
     // Spatial Navigation for D-Pad Remote & Arrow Keys
     function getFocusableElements() {
-      const selector = 'button:not(:disabled):not(.hidden), input:not(:disabled):not(.hidden), select:not(:disabled):not(.hidden), a[href], details summary';
+      const selector = 'button:not(:disabled):not(.hidden), input:not(:disabled):not(.hidden), select:not(:disabled):not(.hidden), a[href]';
       return Array.from(document.querySelectorAll(selector)).filter(el => {
         return el.offsetParent !== null && !el.closest('.hidden');
       });
@@ -1657,25 +1899,21 @@
       }
     }
 
-    // Remote D-Pad and Keyboard Listener
+    // Keyboard & Remote D-Pad Listener
     window.addEventListener('keydown', (e) => {
       const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
 
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        // If typing inside text field and pressing left/right, let text cursor move normally
-        if (isInput && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-          return;
-        }
+        if (isInput && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
         e.preventDefault();
         const dirMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
         navigateSpatial(dirMap[e.key]);
         return;
       }
 
-      // Remote OK / Enter / Space shortcut
+      // Quick play on Enter / Space
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Select') {
         if (!isInput) {
-          // If turn is active and playMoveBtn is ready, execute turn
           if (state && state.phase === 'playing' && state.turn === state.you && !$('playMoveBtn').disabled) {
             $('playMoveBtn').click();
             e.preventDefault();
@@ -1684,11 +1922,16 @@
         }
       }
 
-      // Android TV Back Button / Escape
+      // Fullscreen shortcut (F)
+      if ((e.key === 'f' || e.key === 'F') && !isInput) {
+        toggleFullscreen();
+      }
+
+      // Back / Escape
       if (e.key === 'Escape' || e.key === 'BrowserBack' || e.key === 'GoBack') {
-        if (state && confirm('Leave table?')) {
-          $('leaveRoomBtn').click();
-        }
+        if (!$('controlsModal').classList.contains('hidden')) { $('controlsModal').classList.add('hidden'); return; }
+        if (!$('rulesModal').classList.contains('hidden')) { $('rulesModal').classList.add('hidden'); return; }
+        if (state && confirm('Leave table?')) $('leaveRoomBtn').click();
       }
 
       // TV Remote Color keys shortcut
@@ -1698,7 +1941,7 @@
       if (e.key === 'ColorF3Blue') sound.toggle();
     });
 
-    // Gamepad API Poller for Bluetooth / Wireless Controllers
+    // Gamepad API Poller for Bluetooth Controllers
     let lastGamepadNavTime = 0;
     function pollGamepads() {
       const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -1706,7 +1949,7 @@
         if (!gp) continue;
         const now = Date.now();
 
-        // D-Pad / Axes Navigation (Debounced 180ms)
+        // D-Pad / Analog Stick Navigation
         if (now - lastGamepadNavTime > 180) {
           const axisX = gp.axes[0] || 0;
           const axisY = gp.axes[1] || 0;
@@ -1721,7 +1964,7 @@
           else if (dpadRight || axisX > 0.5) { navigateSpatial('right'); lastGamepadNavTime = now; }
         }
 
-        // Button 0 (A / Cross) -> Click active or Draw Card
+        // (A) Button -> Click / Draw Move
         if (gp.buttons[0]?.pressed && now - lastGamepadNavTime > 250) {
           lastGamepadNavTime = now;
           if (state && state.phase === 'playing' && state.turn === state.you && !$('playMoveBtn').disabled) {
@@ -1731,13 +1974,13 @@
           }
         }
 
-        // Button 3 (Y / Triangle) -> Toggle TV Mode
+        // (Y) Button -> TV Mode Toggle
         if (gp.buttons[3]?.pressed && now - lastGamepadNavTime > 300) {
           lastGamepadNavTime = now;
           toggleTVMode();
         }
 
-        // Button 8/9 (Select / Start) -> Toggle Mute
+        // (Select / Start) -> Mute Toggle
         if ((gp.buttons[8]?.pressed || gp.buttons[9]?.pressed) && now - lastGamepadNavTime > 300) {
           lastGamepadNavTime = now;
           sound.toggle();
@@ -1746,6 +1989,16 @@
       requestAnimationFrame(pollGamepads);
     }
     requestAnimationFrame(pollGamepads);
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    $('fullscreenToggleBtn').onclick = toggleFullscreen;
 
     // ==========================================
     // 7. DOM EVENT BINDINGS
@@ -1816,11 +2069,14 @@
       renderUI();
     };
 
-    $('howToPlayBtn').onclick = () => {
-      const acc = document.querySelector('details');
-      acc.open = !acc.open;
-      acc.scrollIntoView({ behavior: 'smooth' });
-    };
+    // Modals
+    $('controlsModalBtn').onclick = () => $('controlsModal').classList.remove('hidden');
+    $('closeControlsBtn').onclick = () => $('controlsModal').classList.add('hidden');
+    $('howToPlayBtn').onclick = () => $('rulesModal').classList.remove('hidden');
+    $('closeRulesBtn').onclick = () => $('rulesModal').classList.add('hidden');
+
+    $('controlsModal').onclick = (e) => { if (e.target === $('controlsModal')) $('controlsModal').classList.add('hidden'); };
+    $('rulesModal').onclick = (e) => { if (e.target === $('rulesModal')) $('rulesModal').classList.add('hidden'); };
 
     const urlParams = new URLSearchParams(location.search);
     const initialRoomParam = urlParams.get('room');
