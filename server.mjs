@@ -7,8 +7,35 @@ import { fileURLToPath } from 'node:url';
 const PORT = Number(process.env.PORT || 3000);
 const rooms = new Map();
 const MAX_ROOMS = 500;
+const MAX_PLAYERS = 8; // Supports up to 8 players!
+const TOTAL_TRACK_TILES = 46; // Track from START (1) to FINISH (46)
+
 const colors = ['red', 'blue', 'green', 'yellow'];
-const defaults = { boardSize: 24, zeroCount: 10, skipSteps: 1, swapEnabled: true };
+const playerColors = [
+  '#facc15', // 0: Gold/Yellow
+  '#38bdf8', // 1: Cyan/Blue
+  '#4ade80', // 2: Emerald Green
+  '#f87171', // 3: Ruby Red
+  '#c084fc', // 4: Royal Purple
+  '#fb923c', // 5: Flame Orange
+  '#f472b6', // 6: Hot Pink
+  '#a3e635'  // 7: Electric Lime
+];
+
+// Ladders & Shortcuts (as in image)
+const LADDERS = {
+  7: 33,
+  12: 36,
+  24: 42,
+  37: 44
+};
+
+// Snakes / Slides
+const SNAKES = {
+  27: 8,
+  43: 29,
+  45: 30
+};
 
 const fail = (message, status = 400) => {
   const err = new Error(message);
@@ -25,19 +52,24 @@ function nameOf(value) {
 
 function optionsOf(x = {}) {
   return {
-    boardSize: [16, 24, 32].includes(Number(x.boardSize)) ? Number(x.boardSize) : 24,
-    zeroCount: [1, 10].includes(Number(x.zeroCount)) ? Number(x.zeroCount) : 10,
-    skipSteps: [1, 2].includes(Number(x.skipSteps)) ? Number(x.skipSteps) : 1,
+    boardSize: 46,
+    zeroCount: 10,
+    laddersEnabled: x.laddersEnabled !== false,
+    killEnabled: x.killEnabled !== false,
     swapEnabled: x.swapEnabled !== false
   };
 }
 
 function addPlayer(room, name) {
+  const seat = room.players.length;
   const p = {
     id: token(),
     name: nameOf(name),
     score: 0,
+    position: 1, // Starts at Tile 1 (START)
+    kills: 0,
     rps: null,
+    color: playerColors[seat % playerColors.length],
     lastSeen: Date.now()
   };
   room.players.push(p);
@@ -50,40 +82,64 @@ function requirePlayer(room, id) {
   return p;
 }
 
-function deck(size) {
-  return Array.from({ length: size }, (_, i) => ({
-    id: i,
-    value: i % 8 === 6 ? 'SKIP' : i % 8 === 7 ? 'SWAP' : String(randomInt(10)),
-    color: colors[randomInt(4)],
-    active: true
-  }));
+// Generate full UNO Draw Deck
+function createUnoDeck() {
+  const deck = [];
+  let id = 1;
+  colors.forEach(col => {
+    deck.push({ id: id++, value: '0', color: col, type: 'number', steps: 10 });
+    for (let i = 1; i <= 9; i++) {
+      deck.push({ id: id++, value: String(i), color: col, type: 'number', steps: i });
+      deck.push({ id: id++, value: String(i), color: col, type: 'number', steps: i });
+    }
+    deck.push({ id: id++, value: 'SKIP', color: col, type: 'skip', steps: 0 });
+    deck.push({ id: id++, value: 'REVERSE', color: col, type: 'reverse', steps: 0 });
+    deck.push({ id: id++, value: 'SWAP', color: col, type: 'swap', steps: 0 });
+    deck.push({ id: id++, value: '+2', color: col, type: 'bonus', steps: 2 });
+  });
+  // Wild +4 cards
+  for (let w = 0; w < 4; w++) {
+    deck.push({ id: id++, value: '+4 WILD', color: 'wild', type: 'wild', steps: 4 });
+  }
+  // Shuffle deck
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
 }
 
 function snapshot(room, viewer) {
-  const highestScore = room.players.length ? Math.max(...room.players.map(q => q.score)) : 0;
+  const maxPos = room.players.length ? Math.max(...room.players.map(q => q.position || 1)) : 1;
   return {
     code: room.code,
     phase: room.phase,
     version: room.version,
-    options: room.options,
+    options: { ...room.options, totalTiles: TOTAL_TRACK_TILES },
     you: viewer,
     host: 0,
     turn: room.turn,
-    count: room.count,
-    cursor: room.cursor,
-    board: room.board,
+    direction: room.direction || 1,
+    deckCount: room.deck ? room.deck.length : 0,
+    drawnCard: room.drawnCard,
     lastMove: room.lastMove,
     log: room.log,
+    chat: room.chat || [],
     players: room.players.map((p, i) => ({
       seat: i,
       name: p.name,
       score: p.score,
+      position: p.position || 1,
+      kills: p.kills || 0,
+      color: p.color || playerColors[i % playerColors.length],
       ready: !!p.rps,
       rps: room.phase === 'finished' ? p.rps : (i === viewer ? p.rps : (p.rps ? 'ready' : null)),
-      online: Date.now() - p.lastSeen < 20000
+      online: Date.now() - p.lastSeen < 25000
     })),
     winners: room.phase === 'finished'
-      ? room.players.map((p, i) => ({ seat: i, score: p.score })).filter(p => p.score === highestScore).map(p => p.seat)
+      ? room.players.map((p, i) => ({ seat: i, position: p.position || 1, kills: p.kills || 0 }))
+          .filter(p => p.position >= TOTAL_TRACK_TILES || p.position === maxPos)
+          .map(p => p.seat)
       : []
   };
 }
@@ -91,7 +147,23 @@ function snapshot(room, viewer) {
 function note(room, text) {
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   room.log.unshift(`[${time}] ${text}`);
-  room.log = room.log.slice(0, 24);
+  room.log = room.log.slice(0, 30);
+}
+
+function addChatMessage(room, sender, seat, text) {
+  if (!room.chat) room.chat = [];
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const cleanText = String(text || '').trim().slice(0, 140);
+  if (!cleanText) return;
+  room.chat.push({
+    id: token().slice(0, 8),
+    sender,
+    seat,
+    color: playerColors[seat % playerColors.length],
+    text: cleanText,
+    time
+  });
+  if (room.chat.length > 50) room.chat.shift();
 }
 
 function starter(players) {
@@ -111,78 +183,129 @@ function start(room) {
   if (room.players.some(p => !p.rps)) {
     fail('Every player must choose rock, paper, or scissors first.');
   }
-  room.board = deck(room.options.boardSize);
-  room.players.forEach(p => p.score = 0);
+  room.deck = createUnoDeck();
+  room.direction = 1; // 1 = clockwise, -1 = counter-clockwise
+  room.drawnCard = null;
+  room.players.forEach(p => {
+    p.score = 0;
+    p.position = 1; // Start at tile 1
+    p.kills = 0;
+  });
   room.turn = starter(room.players);
-  room.cursor = -1;
-  room.count = 6;
   room.phase = 'playing';
   room.lastMove = null;
   room.log = [];
-  note(room, `${room.players[room.turn].name} won the opening draw and starts! Initial count is 6.`);
+  note(room, `🏁 ${room.players[room.turn].name} won the opening RPS draw and takes the first turn!`);
 }
 
 function play(room, seat) {
   if (room.phase !== 'playing') fail('The game is not in progress.');
   if (room.turn !== seat) fail('Wait for your turn.', 409);
 
-  const remaining = room.board.filter(c => c.active);
-  if (!remaining.length) fail('The board is empty.');
-
-  const path = [];
-  let cursor = room.cursor;
-  for (let n = 0; n < room.count; n++) {
-    do {
-      cursor = (cursor + 1) % room.board.length;
-    } while (!room.board[cursor].active);
-    path.push(cursor);
+  // Ensure deck has cards
+  if (!room.deck || room.deck.length === 0) {
+    room.deck = createUnoDeck();
   }
 
-  const card = room.board[cursor];
-  card.active = false;
+  // DRAW 1 UNO CARD
+  const card = room.deck.pop();
+  room.drawnCard = card;
+
   const p = room.players[seat];
-  p.score++;
-
-  let next = (seat + 1) % room.players.length;
+  const prevPos = p.position || 1;
+  let steps = card.steps;
   let effect = '';
+  let ladderEffect = '';
+  let snakeEffect = '';
+  let knockouts = [];
 
-  if (card.value === 'SKIP') {
-    next = (seat + 1 + room.options.skipSteps) % room.players.length;
-    effect = `⚡ Skip Card! Advancing ${1 + room.options.skipSteps} seats.`;
-  } else if (card.value === 'SWAP') {
+  const dir = room.direction || 1;
+  let nextSeat = (seat + dir + room.players.length) % room.players.length;
+
+  if (card.type === 'skip') {
+    nextSeat = (seat + dir * 2 + room.players.length * 2) % room.players.length;
+    effect = `⚡ SKIP Card! ${room.players[nextSeat].name}'s turn is skipped.`;
+  } else if (card.type === 'reverse') {
+    room.direction = -dir;
+    nextSeat = (seat - dir + room.players.length) % room.players.length;
+    effect = `🔁 REVERSE Card! Turn order reversed.`;
+  } else if (card.type === 'swap') {
     if (room.options.swapEnabled && room.players.length > 1) {
-      const target = next;
-      const prevScore = p.score;
-      p.score = room.players[target].score;
-      room.players[target].score = prevScore;
-      effect = `🔄 Score Swap! Swapped scores with ${room.players[target].name}.`;
+      // Find the player in the lead
+      const opponents = room.players.filter((_, idx) => idx !== seat);
+      const leader = opponents.reduce((prev, curr) => (curr.position > prev.position ? curr : prev), opponents[0]);
+      if (leader) {
+        const leadPos = leader.position;
+        leader.position = prevPos;
+        p.position = leadPos;
+        effect = `🔄 SWAP Card! Swapped positions with ${leader.name} (Now on Tile ${leadPos})!`;
+      }
     } else {
       effect = 'Score swap is disabled or solo mode.';
     }
   } else {
-    room.count = Number(card.value) || room.options.zeroCount;
-    effect = `Next move count set to ${room.count}.`;
+    // Number / Bonus / Wild card
+    let newPos = Math.min(TOTAL_TRACK_TILES, prevPos + steps);
+    p.position = newPos;
+    effect = `Drawn ${card.color.toUpperCase()} ${card.value} ➔ Moved +${steps} tiles to Tile #${newPos}.`;
+
+    // 1. Check Ladder climb
+    if (room.options.laddersEnabled && LADDERS[p.position]) {
+      const ladderDest = LADDERS[p.position];
+      ladderEffect = ` 🪜 LADDER CLIMBED! Jumped from Tile #${p.position} ➔ Tile #${ladderDest}!`;
+      p.position = ladderDest;
+    }
+
+    // 2. Check Snake slide
+    if (SNAKES[p.position]) {
+      const snakeDest = SNAKES[p.position];
+      snakeEffect = ` 🐍 SLID DOWN! Slid from Tile #${p.position} ➔ Tile #${snakeDest}.`;
+      p.position = snakeDest;
+    }
+
+    // 3. LUDO KNOCKOUT (KILL) RULE
+    // If you land on another player's tile (except START 1 or FINISH 46), eliminate them back to START!
+    if (room.options.killEnabled && p.position > 1 && p.position < TOTAL_TRACK_TILES) {
+      room.players.forEach((target, targetIdx) => {
+        if (targetIdx !== seat && target.position === p.position) {
+          target.position = 1; // Send victim back to START
+          p.kills = (p.kills || 0) + 1;
+          p.score += 2; // +2 bonus points for knockout!
+          knockouts.push({
+            victimSeat: targetIdx,
+            victimName: target.name,
+            fromTile: p.position,
+            toTile: 1,
+            killerSeat: seat,
+            killerName: p.name
+          });
+          note(room, `💥 [KNOCKOUT!] ${p.name} eliminated ${target.name} back to START! (+2 PTS)`);
+        }
+      });
+    }
   }
 
-  room.cursor = cursor;
-  room.turn = next;
+  p.score += 1;
+  room.turn = nextSeat;
+
   room.lastMove = {
     number: room.version + 1,
     seat,
-    path,
-    card: card.value,
-    cardColor: card.color,
-    landingIndex: cursor,
-    effect
+    card,
+    prevPos,
+    newPos: p.position,
+    steps,
+    effect: `${effect}${ladderEffect}${snakeEffect}`,
+    knockouts
   };
 
-  note(room, `${p.name} landed on Card #${cursor + 1} (${card.value} ${card.color.toUpperCase()}). +1 pt! ${effect}`);
+  note(room, `${p.name} drew [${card.color.toUpperCase()} ${card.value}] ➔ ${effect}${ladderEffect}${snakeEffect}`);
 
-  if (remaining.length === 1) {
+  // Check victory (reached or passed FINISH tile 46)
+  if (p.position >= TOTAL_TRACK_TILES) {
+    p.position = TOTAL_TRACK_TILES;
     room.phase = 'finished';
-    const maxScore = Math.max(...room.players.map(q => q.score));
-    const winners = room.players.filter(q => q.score === maxScore).map(q => q.name);
-    note(room, `🏆 Board cleared! Winner: ${winners.join(' & ')} (${maxScore} pts).`);
+    note(room, `🏆 ${p.name} REACHED THE FINISH LINE! WINNER!`);
   }
 }
 
@@ -232,7 +355,6 @@ const rateLimitMap = new Map();
 
 export async function handleRequest(req, res) {
   try {
-    // Handle CORS pre-flight
     if (req.method === 'OPTIONS') {
       res.writeHead(204, {
         'Access-Control-Allow-Origin': '*',
@@ -247,8 +369,7 @@ export async function handleRequest(req, res) {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     let pathname = url.pathname;
 
-    // Serve HTML for root
-    if (req.method === 'GET' && pathname === '/') {
+    if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
       const page = await readFile(new URL('./index.html', import.meta.url));
       res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8',
@@ -259,15 +380,16 @@ export async function handleRequest(req, res) {
       return;
     }
 
-    // Normalize API route (supports /api/xyz or /xyz)
-    const apiRoute = pathname.startsWith('/api/') ? pathname.slice(4) : (pathname.startsWith('/api') ? pathname.slice(4) : pathname);
+    let apiRoute = pathname;
+    if (apiRoute.startsWith('/api/')) {
+      apiRoute = apiRoute.slice(4);
+    } else if (apiRoute.startsWith('/api')) {
+      apiRoute = apiRoute.slice(4);
+    }
 
-    if (!pathname.startsWith('/api') && pathname !== '/') {
-      // Check if it matches an api route directly
-      const validEndpoints = ['/state', '/create', '/join', '/rps', '/start', '/play', '/rematch', '/skip-disconnected'];
-      if (!validEndpoints.includes(apiRoute)) {
-        fail('Not found.', 404);
-      }
+    const validEndpoints = ['/state', '/create', '/join', '/rps', '/start', '/play', '/rematch', '/skip-disconnected', '/chat'];
+    if (!validEndpoints.includes(apiRoute)) {
+      fail(`Endpoint not found: ${pathname}`, 404);
     }
 
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '127.0.0.1';
@@ -277,7 +399,7 @@ export async function handleRequest(req, res) {
       r = { since: now, count: 0 };
       rateLimitMap.set(ip, r);
     }
-    if (++r.count > 1200) {
+    if (++r.count > 1500) {
       fail('Too many requests. Please slow down.', 429);
     }
 
@@ -314,18 +436,19 @@ export async function handleRequest(req, res) {
         phase: 'lobby',
         version: 1,
         options: optionsOf(b.options),
-        board: [],
+        deck: [],
         turn: 0,
-        count: 6,
-        cursor: -1,
+        direction: 1,
+        drawnCard: null,
         lastMove: null,
         log: [],
+        chat: [],
         touched: now
       };
 
       const p = addPlayer(room, b.name);
       rooms.set(roomCode, room);
-      note(room, `Room created by ${p.name}. Waiting for players...`);
+      note(room, `Table created by ${p.name}. Up to 8 players can join!`);
 
       sendJson(res, 201, {
         token: p.id,
@@ -340,7 +463,7 @@ export async function handleRequest(req, res) {
 
     if (apiRoute === '/join') {
       if (room.phase !== 'lobby') fail('This game has already started. Ask host to start a rematch.');
-      if (room.players.length >= 4) fail('This room is full (max 4 players).');
+      if (room.players.length >= MAX_PLAYERS) fail(`This room is full (max ${MAX_PLAYERS} players).`);
 
       const p = addPlayer(room, b.name);
       room.version++;
@@ -357,6 +480,13 @@ export async function handleRequest(req, res) {
     const authHeader = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
     const p = requirePlayer(room, authHeader);
     const seat = room.players.indexOf(p);
+
+    if (apiRoute === '/chat') {
+      addChatMessage(room, p.name, seat, b.message);
+      room.touched = now;
+      sendJson(res, 200, { chat: room.chat });
+      return;
+    }
 
     if (b.version !== undefined && b.version !== room.version) {
       fail('The game table updated. Synchronizing, please try again.', 409);
@@ -387,11 +517,14 @@ export async function handleRequest(req, res) {
         if (seat !== 0) fail('Only the host can initiate a rematch.', 403);
         if (room.phase !== 'finished') fail('Finish the current round before rematching.');
         room.phase = 'lobby';
-        room.board = [];
+        room.deck = [];
+        room.drawnCard = null;
         room.lastMove = null;
         room.players.forEach(q => {
           q.rps = null;
           q.score = 0;
+          q.position = 1;
+          q.kills = 0;
         });
         note(room, 'Rematch lobby opened! Choose rock, paper, or scissors for the new round.');
         break;
@@ -404,7 +537,7 @@ export async function handleRequest(req, res) {
           fail('Player must be inactive/disconnected for at least 30 seconds.');
         }
         note(room, `Host skipped inactive player ${currentActive.name}.`);
-        room.turn = (room.turn + 1) % room.players.length;
+        room.turn = (room.turn + (room.direction || 1) + room.players.length) % room.players.length;
         break;
 
       default:
@@ -423,23 +556,22 @@ export async function handleRequest(req, res) {
   }
 }
 
-// Cleanup stale rooms & rate limits every 2 minutes
+// Cleanup idle rooms every 2 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [k, r] of rooms) {
-    if (now - r.touched > 7200000) rooms.delete(k); // 2 hours
+    if (now - r.touched > 7200000) rooms.delete(k);
   }
   for (const [k, r] of rateLimitMap) {
     if (now - r.since > 60000) rateLimitMap.delete(k);
   }
 }, 120000).unref();
 
-// Run standalone server if executed directly
 const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isDirectRun || process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const server = http.createServer(handleRequest);
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`UNO Counting Cards server running at http://localhost:${PORT}`);
+    console.log(`UNO Counting Cards & Snakes Labyrinth server running at http://localhost:${PORT}`);
   });
 }
 
