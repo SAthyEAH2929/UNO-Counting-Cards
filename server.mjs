@@ -411,17 +411,36 @@ export async function handleRequest(req, res) {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     let pathname = url.pathname;
 
-    if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
-      try {
-        const page = await readFile(new URL('./index.html', import.meta.url));
-        res.writeHead(200, {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache',
-          'X-Content-Type-Options': 'nosniff'
-        });
-        res.end(page);
-        return;
-      } catch {}
+    if (req.method === 'GET') {
+      if (pathname === '/' || pathname === '/index.html') {
+        try {
+          const page = await readFile(new URL('./index.html', import.meta.url));
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+          res.end(page);
+          return;
+        } catch {}
+      } else if (pathname === '/manifest.json') {
+        try {
+          const manifest = await readFile(new URL('./manifest.json', import.meta.url));
+          res.writeHead(200, { 'Content-Type': 'application/manifest+json; charset=utf-8' });
+          res.end(manifest);
+          return;
+        } catch {}
+      } else if (pathname === '/sw.js') {
+        try {
+          const sw = await readFile(new URL('./sw.js', import.meta.url));
+          res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8', 'Service-Worker-Allowed': '/' });
+          res.end(sw);
+          return;
+        } catch {}
+      } else if (pathname.endsWith('.png')) {
+        try {
+          const img = await readFile(new URL('.' + pathname, import.meta.url));
+          res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+          res.end(img);
+          return;
+        } catch {}
+      }
     }
 
     // Resolve API route across Node, Render, and Vercel serverless / rewrites

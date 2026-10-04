@@ -9,9 +9,13 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#070a14">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
   <style>
     :root {
       --bg-dark: #060913;
@@ -2085,6 +2089,26 @@
     if (auth) syncState();
     setInterval(() => { if (!document.hidden && auth) syncState(); }, 1000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden && auth) syncState(); });
+
+    // CrazyGames SDK v3 Integration
+    let crazySDK = null;
+    try {
+      if (window.CrazyGames && window.CrazyGames.SDK) {
+        window.CrazyGames.SDK.init().then(() => {
+          crazySDK = window.CrazyGames.SDK;
+          console.log('CrazyGames SDK initialized');
+        }).catch(() => {});
+      }
+    } catch {}
+
+    // PWA Service Worker Registration (PWABuilder Compliance)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('PWA ServiceWorker registered:', reg.scope);
+        }).catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
