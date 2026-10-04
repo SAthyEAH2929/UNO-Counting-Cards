@@ -3,8 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>UNO Snakes, Ladders & Traps — Multiplayer 46/100/200 Tiles</title>
-  <meta name="description" content="Multiplayer board race where you draw UNO cards instead of rolling dice! 46, 100, or 200 tiles modes with animated character runners, ladders, pitfall traps, Ludo knockouts, and live chat.">
+  <title>UNO Snakes, Ladders & Traps — Android TV & Mobile Multiplayer</title>
+  <meta name="description" content="Multiplayer board race where you draw UNO cards instead of rolling dice! 46, 100, or 200 tiles modes with animated character runners, traps, Ludo knockouts, Android TV remote D-Pad, and live chat.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070a12">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,6 +23,7 @@
       --accent-yellow: #f59e0b;
       --accent-red: #ef4444;
       --accent-purple: #a855f7;
+      --accent-cyan: #38bdf8;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
@@ -42,9 +47,97 @@
       flex-direction: column;
       overflow-x: hidden;
       touch-action: manipulation;
+      scroll-behavior: smooth;
     }
 
     button, input, select { font-family: inherit; }
+
+    /* ====================================================
+       ANDROID TV & SMART TV FOCUS STYLES & 10-FOOT UI
+       ==================================================== */
+    :focus-visible, .tv-focused {
+      outline: 3.5px solid var(--accent-cyan) !important;
+      outline-offset: 3px !important;
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.95), inset 0 0 10px rgba(56, 189, 248, 0.4) !important;
+      transform: scale(1.03) !important;
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease !important;
+      z-index: 100 !important;
+    }
+
+    /* TV 10-Foot Mode */
+    body.tv-mode {
+      font-size: 1.15rem;
+    }
+
+    body.tv-mode .header-inner,
+    body.tv-mode main {
+      max-width: 96vw;
+    }
+
+    body.tv-mode .btn {
+      padding: 14px 24px;
+      font-size: 1.1rem;
+      border-radius: var(--radius-md);
+      min-height: 52px;
+    }
+
+    body.tv-mode .btn-lg {
+      padding: 16px 28px;
+      font-size: 1.25rem;
+      min-height: 60px;
+    }
+
+    body.tv-mode .drawn-card-stage {
+      width: 145px;
+      height: 210px;
+    }
+
+    body.tv-mode .card-value-display {
+      font-size: 2.8rem;
+    }
+
+    body.tv-mode .map-tile {
+      min-height: 58px;
+    }
+
+    body.tv-mode .runner-man-pawn {
+      transform: translateY(-8px) scale(1.2);
+    }
+
+    /* TV / Gamepad helper bar */
+    .tv-helper-bar {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(8, 13, 24, 0.94);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      z-index: 99;
+      flex-wrap: wrap;
+    }
+
+    .tv-helper-bar strong {
+      color: #38bdf8;
+    }
+
+    .tv-tag {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
 
     /* Navigation Header */
     header {
@@ -118,6 +211,12 @@
       gap: 5px;
       cursor: pointer;
       transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover, .icon-btn.active {
+      color: #fff;
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.15);
     }
 
     /* Main Container */
@@ -207,8 +306,8 @@
     }
 
     input:focus, select:focus {
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
     }
 
     .grid-2 {
@@ -252,17 +351,26 @@
     }
     .btn-primary:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
 
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.15); }
+
     .btn-accent {
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #fff;
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
     }
+    .btn-accent:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
 
     .btn-danger {
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.4);
       color: #fca5a5;
     }
+    .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.25); }
 
     .btn-lg { padding: 13px 22px; font-size: 1.05rem; border-radius: var(--radius-md); }
     .btn-block { width: 100%; }
@@ -338,6 +446,7 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8);
+      scroll-behavior: smooth;
     }
 
     .track-map-header {
@@ -396,6 +505,7 @@
       padding: 3px 2px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
       user-select: none;
+      transition: all 0.2s ease;
     }
 
     /* Colorful tile themes */
@@ -450,50 +560,50 @@
 
     .tile-pawns-row {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       justify-content: center;
       gap: 2px;
-      flex-wrap: wrap;
-      min-height: 22px;
-      z-index: 10;
+      min-height: 20px;
+      width: 100%;
     }
 
     /* ====================================================
-       ANIMATED CHARACTER "MAN" RUNNER PAWN
+       ANIMATED 3D CHARACTER "MAN" RUNNER PAWNS
        ==================================================== */
     .runner-man-pawn {
-      width: 22px;
-      height: 26px;
-      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.8));
-      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      user-select: none;
+      transform: translateY(-4px);
+      transition: transform 0.15s ease;
+      z-index: 10;
     }
 
     .man-head {
-      width: 10px;
-      height: 10px;
+      width: 13px;
+      height: 13px;
       border-radius: 50%;
       background: currentColor;
       border: 1.5px solid #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.55rem;
       font-weight: 900;
       color: #000;
-      z-index: 2;
+      line-height: 1;
     }
 
     .man-body {
       width: 8px;
-      height: 10px;
+      height: 9px;
       background: currentColor;
-      border-radius: 3px;
+      border-radius: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
       margin-top: -1px;
-      position: relative;
     }
 
     .man-legs {
@@ -559,6 +669,7 @@
       border: 3.5px solid rgba(255, 255, 255, 0.9);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
       user-select: none;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .card-bg-red { background: linear-gradient(135deg, #ef4444, #991b1b); }
@@ -622,10 +733,10 @@
 
     .emoji-pill {
       background: rgba(255, 255, 255, 0.06);
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: #fff;
       font-size: 0.95rem;
-      padding: 3px 6px;
+      padding: 4px 8px;
       border-radius: 6px;
       cursor: pointer;
     }
@@ -637,6 +748,32 @@
       padding: 18px;
       text-align: center;
       margin-bottom: 16px;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(15, 23, 42, 0.96);
+      border: 1.5px solid var(--accent-cyan);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.5);
+      animation: toast-in 0.25s ease-out;
+    }
+
+    @keyframes toast-in {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     .hidden { display: none !important; }
@@ -661,6 +798,7 @@
         <div><span class="brand-title">UNO Board Race</span></div>
       </div>
       <div class="header-actions">
+        <button id="tvModeToggle" class="icon-btn" title="Toggle Android TV 10-Foot Mode / Fullscreen"><span>📺</span> <span id="tvModeText">TV Mode</span></button>
         <button id="soundToggle" class="icon-btn" title="Audio"><span id="soundIcon">🔊</span></button>
         <button id="howToPlayBtn" class="icon-btn"><span>📖</span> Rules</button>
       </div>
@@ -671,7 +809,7 @@
     <!-- LOBBY -->
     <section id="entrySection">
       <div class="hero">
-        <div class="hero-tag">🎮 46 / 100 / 200 Tiles Modes · Animated Runner Pawns</div>
+        <div class="hero-tag">📺 Android TV & Mobile Ready · 46 / 100 / 200 Tiles Modes</div>
         <h1>Draw UNO Cards.<br><span class="highlight">Dodge Traps & Knockout Foes!</span></h1>
         <p>Choose your track length (46, 100, or 200 tiles), watch your 3D character runner sprint along the board, dodge pitfall & freeze traps, and climb ladders to FINISH!</p>
       </div>
@@ -763,7 +901,7 @@
           </div>
 
           <!-- DYNAMIC TRACK MAP -->
-          <div class="track-map-wrapper">
+          <div class="track-map-wrapper" id="trackMapWrapper">
             <div class="track-map-header">
               <h3 id="mapTrackTitle" style="font-size:1.1rem;"><span>🗺️</span> Winding Board Race Track</h3>
               <div class="track-legend">
@@ -825,9 +963,20 @@
         <p>3. <strong>🪤 Freeze Trap</strong>: Stepping into a freeze trap makes you <strong>miss your next card draw turn</strong>!</p>
         <p>4. <strong>💥 Ludo Knockout</strong>: Landing on another player's tile eliminates them back to START!</p>
         <p>5. <strong>🪜 Ladders</strong>: Climb up shortcut ladders to get ahead!</p>
+        <p>6. <strong>📺 Android TV & Gamepad</strong>: Use D-Pad [▲ ▼ ◄ ►] + [OK] on your remote or Bluetooth Gamepad (A) to play effortlessly from the couch!</p>
       </div>
     </details>
   </main>
+
+  <!-- TV & Controller Helper Bar -->
+  <footer class="tv-helper-bar" id="tvHelperBar">
+    <span class="tv-tag">📺 TV / GAMEPAD</span>
+    <span>D-Pad <strong>[▲ ▼ ◄ ►]</strong> Navigate</span>
+    <span>•</span>
+    <span>Remote <strong>[OK]</strong> or Gamepad <strong>(A)</strong> Select / Draw Card</span>
+    <span>•</span>
+    <span><strong>[TV Mode]</strong> 10-Foot View</span>
+  </footer>
 
   <div class="toast-container"><div id="toast" class="toast hidden"></div></div>
 
@@ -842,10 +991,8 @@
       else if (total === 200) { cols = 15; rows = 14; }
 
       for (let i = 1; i <= total; i++) {
-        // Serpentine row-column coordinates
         let r, c;
         if (total === 46) {
-          // Exact loop coordinates for 46 tiles
           const map46 = [
             [0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[11,5],
             [11,4],[11,3],[11,2],[11,1],[11,0],[10,0],[9,0],[8,0],[7,0],[6,0],[5,0],[4,0],
@@ -855,7 +1002,6 @@
           const coord = map46[i - 1] || [0, 0];
           c = coord[0]; r = coord[1];
         } else {
-          // Boustrophedon / serpentine grid for 100 & 200 tiles
           const rowFromBottom = Math.floor((i - 1) / cols);
           r = rows - 1 - rowFromBottom;
           const colInRow = (i - 1) % cols;
@@ -1129,6 +1275,19 @@
       }
     }
 
+    // Smooth Auto Camera Tracker for Android TV / Displays
+    function autoCenterTileOnScreen(tileId) {
+      const tileEl = document.getElementById('track-tile-' + tileId);
+      const wrapper = $('trackMapWrapper');
+      if (tileEl && wrapper) {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const tileRect = tileEl.getBoundingClientRect();
+        const scrollLeft = wrapper.scrollLeft + (tileRect.left - wrapperRect.left) - (wrapperRect.width / 2) + (tileRect.width / 2);
+        const scrollTop = wrapper.scrollTop + (tileRect.top - wrapperRect.top) - (wrapperRect.height / 2) + (tileRect.height / 2);
+        wrapper.scrollTo({ left: Math.max(0, scrollLeft), top: Math.max(0, scrollTop), behavior: 'smooth' });
+      }
+    }
+
     // Step-by-Step 3D Character "Man" Runner Animation
     async function triggerTurnAnimation(move) {
       isAnimating = true;
@@ -1154,6 +1313,7 @@
         while (cur < target && cur < totalTiles) {
           cur++;
           updateManPawnSlot(seat, cur, initial, true);
+          autoCenterTileOnScreen(cur);
           sound.playStep();
           await new Promise(r => setTimeout(r, 130));
         }
@@ -1359,7 +1519,7 @@
         if (isFinished) {
           $('turnBannerTitle').textContent = '🏁 Match Finished!';
         } else if (s.turn === s.you) {
-          if (activeP.missTurns > 0) {
+          if (activeP?.missTurns > 0) {
             $('turnBannerTitle').textContent = '❄️ You are Frozen! Pass turn.';
           } else {
             $('turnBannerTitle').textContent = '🔥 It\'s Your Turn to Run!';
@@ -1376,6 +1536,11 @@
         playBtn.classList.toggle('hidden', isFinished);
         playBtn.disabled = isBusy || isAnimating || s.turn !== s.you || s.phase !== 'playing';
         $('playMoveText').textContent = isAnimating ? 'Drawing & Running...' : (activeP?.missTurns > 0 ? 'Pass Frozen Turn' : 'Draw UNO Card & Run');
+
+        // TV Auto-Focus on Local Turn
+        if (s.turn === s.you && !playBtn.disabled && document.activeElement !== $('chatInput')) {
+          playBtn.focus();
+        }
       }
 
       // Chat
@@ -1393,7 +1558,197 @@
     }
 
     // ==========================================
-    // 6. DOM EVENT BINDINGS
+    // 6. ANDROID TV & GAMEPAD NAVIGATION ENGINE
+    // ==========================================
+    let isTVMode = false;
+
+    // Detect Smart TV / Android TV user-agents automatically
+    const isTVDevice = /TV|SmartTV|GoogleTV|Android.*TV|AFT|HbbTV|NetCast|Tizen|Web0S|Playstation/i.test(navigator.userAgent);
+    if (isTVDevice) {
+      enableTVMode(true);
+    }
+
+    function toggleTVMode() {
+      enableTVMode(!isTVMode);
+    }
+
+    function enableTVMode(enable) {
+      isTVMode = enable;
+      document.body.classList.toggle('tv-mode', isTVMode);
+      $('tvModeToggle').classList.toggle('active', isTVMode);
+      $('tvModeText').textContent = isTVMode ? 'TV Mode ON' : 'TV Mode';
+      if (isTVMode && !document.fullscreenElement && document.documentElement.requestFullscreen) {
+        try { document.documentElement.requestFullscreen(); } catch {}
+      }
+      toast(isTVMode ? '📺 Android TV Mode Activated' : '📱 Standard Mode');
+    }
+
+    $('tvModeToggle').onclick = toggleTVMode;
+
+    // Spatial Navigation for D-Pad Remote & Arrow Keys
+    function getFocusableElements() {
+      const selector = 'button:not(:disabled):not(.hidden), input:not(:disabled):not(.hidden), select:not(:disabled):not(.hidden), a[href], details summary';
+      return Array.from(document.querySelectorAll(selector)).filter(el => {
+        return el.offsetParent !== null && !el.closest('.hidden');
+      });
+    }
+
+    function navigateSpatial(direction) {
+      const focusables = getFocusableElements();
+      if (!focusables.length) return;
+
+      const current = document.activeElement && focusables.includes(document.activeElement)
+        ? document.activeElement
+        : focusables[0];
+
+      if (!document.activeElement || !focusables.includes(document.activeElement)) {
+        current.focus();
+        return;
+      }
+
+      const curRect = current.getBoundingClientRect();
+      const curCenter = { x: curRect.left + curRect.width / 2, y: curRect.top + curRect.height / 2 };
+
+      let bestCandidate = null;
+      let minDistance = Infinity;
+
+      focusables.forEach(target => {
+        if (target === current) return;
+        const targetRect = target.getBoundingClientRect();
+        const targetCenter = { x: targetRect.left + targetRect.width / 2, y: targetRect.top + targetRect.height / 2 };
+
+        const dx = targetCenter.x - curCenter.x;
+        const dy = targetCenter.y - curCenter.y;
+
+        let valid = false;
+        let primaryDist = 0;
+        let secondaryDist = 0;
+
+        if (direction === 'up' && dy < -5) {
+          valid = true;
+          primaryDist = Math.abs(dy);
+          secondaryDist = Math.abs(dx);
+        } else if (direction === 'down' && dy > 5) {
+          valid = true;
+          primaryDist = Math.abs(dy);
+          secondaryDist = Math.abs(dx);
+        } else if (direction === 'left' && dx < -5) {
+          valid = true;
+          primaryDist = Math.abs(dx);
+          secondaryDist = Math.abs(dy);
+        } else if (direction === 'right' && dx > 5) {
+          valid = true;
+          primaryDist = Math.abs(dx);
+          secondaryDist = Math.abs(dy);
+        }
+
+        if (valid) {
+          const score = primaryDist * 1.0 + secondaryDist * 2.2;
+          if (score < minDistance) {
+            minDistance = score;
+            bestCandidate = target;
+          }
+        }
+      });
+
+      if (bestCandidate) {
+        bestCandidate.focus();
+        bestCandidate.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      }
+    }
+
+    // Remote D-Pad and Keyboard Listener
+    window.addEventListener('keydown', (e) => {
+      const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        // If typing inside text field and pressing left/right, let text cursor move normally
+        if (isInput && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+          return;
+        }
+        e.preventDefault();
+        const dirMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+        navigateSpatial(dirMap[e.key]);
+        return;
+      }
+
+      // Remote OK / Enter / Space shortcut
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Select') {
+        if (!isInput) {
+          // If turn is active and playMoveBtn is ready, execute turn
+          if (state && state.phase === 'playing' && state.turn === state.you && !$('playMoveBtn').disabled) {
+            $('playMoveBtn').click();
+            e.preventDefault();
+            return;
+          }
+        }
+      }
+
+      // Android TV Back Button / Escape
+      if (e.key === 'Escape' || e.key === 'BrowserBack' || e.key === 'GoBack') {
+        if (state && confirm('Leave table?')) {
+          $('leaveRoomBtn').click();
+        }
+      }
+
+      // TV Remote Color keys shortcut
+      if (e.key === 'ColorF0Red') $('leaveRoomBtn')?.click();
+      if (e.key === 'ColorF1Green') $('playMoveBtn')?.click();
+      if (e.key === 'ColorF2Yellow') $('copyInviteBtn')?.click();
+      if (e.key === 'ColorF3Blue') sound.toggle();
+    });
+
+    // Gamepad API Poller for Bluetooth / Wireless Controllers
+    let lastGamepadNavTime = 0;
+    function pollGamepads() {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      for (const gp of gamepads) {
+        if (!gp) continue;
+        const now = Date.now();
+
+        // D-Pad / Axes Navigation (Debounced 180ms)
+        if (now - lastGamepadNavTime > 180) {
+          const axisX = gp.axes[0] || 0;
+          const axisY = gp.axes[1] || 0;
+          const dpadUp = gp.buttons[12]?.pressed;
+          const dpadDown = gp.buttons[13]?.pressed;
+          const dpadLeft = gp.buttons[14]?.pressed;
+          const dpadRight = gp.buttons[15]?.pressed;
+
+          if (dpadUp || axisY < -0.5) { navigateSpatial('up'); lastGamepadNavTime = now; }
+          else if (dpadDown || axisY > 0.5) { navigateSpatial('down'); lastGamepadNavTime = now; }
+          else if (dpadLeft || axisX < -0.5) { navigateSpatial('left'); lastGamepadNavTime = now; }
+          else if (dpadRight || axisX > 0.5) { navigateSpatial('right'); lastGamepadNavTime = now; }
+        }
+
+        // Button 0 (A / Cross) -> Click active or Draw Card
+        if (gp.buttons[0]?.pressed && now - lastGamepadNavTime > 250) {
+          lastGamepadNavTime = now;
+          if (state && state.phase === 'playing' && state.turn === state.you && !$('playMoveBtn').disabled) {
+            $('playMoveBtn').click();
+          } else if (document.activeElement && typeof document.activeElement.click === 'function') {
+            document.activeElement.click();
+          }
+        }
+
+        // Button 3 (Y / Triangle) -> Toggle TV Mode
+        if (gp.buttons[3]?.pressed && now - lastGamepadNavTime > 300) {
+          lastGamepadNavTime = now;
+          toggleTVMode();
+        }
+
+        // Button 8/9 (Select / Start) -> Toggle Mute
+        if ((gp.buttons[8]?.pressed || gp.buttons[9]?.pressed) && now - lastGamepadNavTime > 300) {
+          lastGamepadNavTime = now;
+          sound.toggle();
+        }
+      }
+      requestAnimationFrame(pollGamepads);
+    }
+    requestAnimationFrame(pollGamepads);
+
+    // ==========================================
+    // 7. DOM EVENT BINDINGS
     // ==========================================
     $('createRoomBtn').onclick = () => {
       const name = $('nameInput').value.trim();
