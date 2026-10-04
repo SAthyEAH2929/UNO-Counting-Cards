@@ -412,19 +412,44 @@ export async function handleRequest(req, res) {
     let pathname = url.pathname;
 
     if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
-      const page = await readFile(new URL('./index.html', import.meta.url));
-      res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff'
-      });
-      res.end(page);
-      return;
+      try {
+        const page = await readFile(new URL('./index.html', import.meta.url));
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache',
+          'X-Content-Type-Options': 'nosniff'
+        });
+        res.end(page);
+        return;
+      } catch {}
     }
 
-    let apiRoute = pathname;
-    if (apiRoute.startsWith('/api/')) apiRoute = apiRoute.slice(4);
-    else if (apiRoute.startsWith('/api')) apiRoute = apiRoute.slice(4);
+    // Resolve API route across Node, Render, and Vercel serverless / rewrites
+    let apiRoute = '';
+    const actionQuery = url.searchParams.get('action');
+    if (actionQuery) {
+      apiRoute = '/' + actionQuery.replace(/^\/+/, '');
+    } else if (req.query && req.query.action) {
+      apiRoute = '/' + String(req.query.action).replace(/^\/+/, '');
+    } else if (req.query && req.query.slug) {
+      const slug = Array.isArray(req.query.slug) ? req.query.slug.join('/') : req.query.slug;
+      apiRoute = '/' + slug.replace(/^\/+/, '');
+    } else {
+      let cleanPath = pathname;
+      if (cleanPath.startsWith('/api/')) cleanPath = cleanPath.slice(4);
+      else if (cleanPath.startsWith('/api')) cleanPath = cleanPath.slice(4);
+
+      if (cleanPath === '/index.js' || cleanPath === 'index.js') {
+        const matched = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || '';
+        if (matched.startsWith('/api/')) {
+          cleanPath = matched.slice(4);
+        }
+      }
+      apiRoute = cleanPath;
+    }
+
+    apiRoute = apiRoute.split('?')[0];
+    if (!apiRoute.startsWith('/')) apiRoute = '/' + apiRoute;
 
     const validEndpoints = ['/state', '/create', '/join', '/rps', '/start', '/play', '/rematch', '/skip-disconnected', '/chat'];
     if (!validEndpoints.includes(apiRoute)) fail(`Endpoint not found: ${pathname}`, 404);
@@ -439,7 +464,7 @@ export async function handleRequest(req, res) {
     if (++r.count > 1500) fail('Too many requests. Please slow down.', 429);
 
     if (req.method === 'GET' && apiRoute === '/state') {
-      const roomCode = String(url.searchParams.get('room') || '').trim().toUpperCase();
+      const roomCode = String(url.searchParams.get('room') || req.query?.room || '').trim().toUpperCase();
       const room = rooms.get(roomCode);
       if (!room) fail('Room not found or expired.', 404);
 
@@ -598,8 +623,8 @@ setInterval(() => {
   }
 }, 120000).unref();
 
-const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
-if (isDirectRun || process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+const isDirectRun = process.argv[1] && (fileURLToPath(import.meta.url) === process.argv[1] || process.argv[1].endsWith('server.mjs'));
+if (isDirectRun && !process.env.VERCEL) {
   const server = http.createServer(handleRequest);
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`UNO Snakes & Ladders (46/100/200 Tiles) running at http://localhost:${PORT}`);
@@ -607,3 +632,4 @@ if (isDirectRun || process.env.NODE_ENV !== 'production' || !process.env.VERCEL)
 }
 
 export default handleRequest;
+
