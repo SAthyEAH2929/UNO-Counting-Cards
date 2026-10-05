@@ -1455,8 +1455,12 @@
       setTimeout(() => popup.remove(), 1500);
     }
 
+    const API_BASE = (location.hostname && !location.hostname.includes('vercel.app') && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1'))
+      ? 'https://uno-snakes-ladders-traps-multiplaye.vercel.app'
+      : '';
+
     async function apiRequest(endpoint, data = null) {
-      const url = '/api/' + endpoint;
+      const url = API_BASE + '/api/' + endpoint;
       const headers = { 'Content-Type': 'application/json' };
       if (auth && auth.token) headers['Authorization'] = 'Bearer ' + auth.token;
 
