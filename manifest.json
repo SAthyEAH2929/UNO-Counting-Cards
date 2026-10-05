@@ -8,7 +8,7 @@
   "lang": "en",
   "dir": "ltr",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
+  "display_override": ["window-controls-overlay", "tabbed", "standalone", "fullscreen"],
   "orientation": "any",
   "background_color": "#060913",
   "theme_color": "#060913",
@@ -55,6 +55,36 @@
         "application/json": [".json"],
         "text/plain": [".txt"]
       }
+    }
+  ],
+  "note_taking": {
+    "new_note_url": "/?note=new"
+  },
+  "widgets": [
+    {
+      "name": "UNO Race Quick Stats",
+      "short_name": "UNO Stats",
+      "description": "Quick active match status and leaderboard",
+      "tag": "uno-race-stats",
+      "template": "uno-stats-template",
+      "ms_ac_template": "widgets/stats.json",
+      "data": "widgets/stats-data.json",
+      "type": "application/json",
+      "screenshots": [
+        {
+          "src": "/screenshot-mobile.png",
+          "sizes": "720x1280",
+          "label": "Widget Preview"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ],
+      "auth": false,
+      "update": 86400
     }
   ],
   "icons": [
